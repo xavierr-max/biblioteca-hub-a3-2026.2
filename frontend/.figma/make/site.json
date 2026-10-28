@@ -1,0 +1,10 @@
+{
+  "description": "Sistema responsivo de gestão de biblioteca para equipes acadêmicas, com navegação centralizada por livros, leitores, empréstimos, devoluções e relatórios.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
