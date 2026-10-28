@@ -185,6 +185,18 @@ export const LibraryProvider: React.FC<{ children: ReactNode }> = ({ children })
     });
   };
 
+  const syncReaderLoanCounts = (allReaders: Reader[], allLoans: Loan[]): Reader[] => {
+    return allReaders.map((reader) => ({
+      ...reader,
+      activeLoansCount: allLoans.filter(
+        (loan) =>
+          loan.readerId === reader.id &&
+          loan.status !== 'RETURNED' &&
+          !loan.returnDate
+      ).length,
+    }));
+  };
+
   // Persist state updates
   useEffect(() => {
     saveToStorage('books', books);
@@ -210,6 +222,21 @@ export const LibraryProvider: React.FC<{ children: ReactNode }> = ({ children })
     saveToStorage('currentUser', currentUser);
   }, [currentUser]);
 
+  // Keep derived counters compatible with persisted data after reloads or
+  // older versions of the local prototype. The underlying records remain
+  // unchanged; only their denormalized counters are repaired.
+  useEffect(() => {
+    const synchronizedBooks = syncBookAvailability(books, copies);
+    if (JSON.stringify(synchronizedBooks) !== JSON.stringify(books)) {
+      setBooks(synchronizedBooks);
+    }
+
+    const synchronizedReaders = syncReaderLoanCounts(readers, loans);
+    if (JSON.stringify(synchronizedReaders) !== JSON.stringify(readers)) {
+      setReaders(synchronizedReaders);
+    }
+  }, [books, copies, readers, loans]);
+
   const showToast = (toast: Omit<ToastMessage, 'id'>) => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const newToast: ToastMessage = { ...toast, id };
@@ -231,7 +258,9 @@ export const LibraryProvider: React.FC<{ children: ReactNode }> = ({ children })
     setLoans(INITIAL_LOANS);
     setUsers(INITIAL_USERS);
     setCurrentUser(INITIAL_USERS[0]);
-    localStorage.clear();
+    (['books', 'copies', 'readers', 'loans', 'users', 'currentUser'] as const).forEach(
+      (key) => localStorage.removeItem(STORAGE_KEY_PREFIX + key)
+    );
     showToast({
       title: 'Dados restaurados',
       description: 'A base de dados de demonstração foi redefinida.',
