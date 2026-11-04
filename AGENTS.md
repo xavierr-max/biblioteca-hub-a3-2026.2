@@ -29,6 +29,20 @@ Este arquivo é o ponto de entrada de contexto do projeto Biblioteca.
 
 Se a tarefa for interrompida ou ficar parcialmente concluída, registre igualmente o estado, os comandos executados, os resultados e o bloqueio em `CHANGELOG.md`, `TESTING.md` e `NEXT_STEPS.md`, conforme aplicável.
 
+## Manutenção obrigatória da documentação de testes
+
+Sempre que qualquer teste for criado, modificado ou removido:
+
+1. Atualizar `docs/TESTING_GUIDE.md` e a lista/explicação dos testes afetados.
+2. Atualizar `docs/TESTING_PRESENTATION.md` se exemplos ou roteiro forem impactados.
+3. Atualizar `docs/ai/TESTING.md` com resultados reais.
+4. Atualizar `docs/ai/CHANGELOG.md`.
+5. Atualizar `docs/ai/NEXT_STEPS.md` quando necessário.
+
+Sempre que uma regra de negócio for alterada, revisar os testes relacionados, atualizar a explicação do comportamento esperado e registrar o impacto na documentação correspondente.
+
+Sempre que uma suíte for executada, registrar os resultados relevantes, a data da validação completa e distinguir métricas atuais de históricas. Nunca declarar validações não executadas.
+
 Documentação antiga é apenas contexto: o código atual é a fonte de verdade. Não registrar credenciais, tokens ou dados sensíveis. Diferenciar claramente funcionalidades implementadas de planejadas.
 
 ## Contexto persistente

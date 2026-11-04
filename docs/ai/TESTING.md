@@ -1,5 +1,11 @@
 # Testes
 
+Documentação didática completa: `docs/TESTING_GUIDE.md`. Resumo para apresentação: `docs/TESTING_PRESENTATION.md`.
+
+Validação pré-commit mais recente: 5 suítes e 21 testes aprovados; TypeScript e build de produção aprovados.
+
+A suíte de páginas usa timeout explícito de 10 segundos porque combina várias interações assíncronas de `userEvent`; isso foi ajustado sem alterar regras de negócio.
+
 ## Atualização — 2026-11-04
 
 - Configurados React Testing Library 16, `@testing-library/jest-dom` 7 e user-event 14.
@@ -23,6 +29,7 @@
 - `src/context/__tests__/LibraryContext.integration.test.tsx`: fluxo integrado do provider, persistência e mutações.
 - `src/domain/__tests__/returnRules.test.ts`: validação/aplicação de devoluções.
 - `src/domain/__tests__/reporting.test.ts`: status, histórico, CSV e períodos.
+- `src/pages/__tests__/pages.integration.test.tsx`: interação das páginas de livros, leitores, empréstimos e devoluções.
 
 ## Última execução — 2026-11-04
 

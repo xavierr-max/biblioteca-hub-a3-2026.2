@@ -7,6 +7,9 @@ import { ReadersPage } from '../ReadersPage';
 import { LoansPage } from '../LoansPage';
 import { ReturnsPage } from '../ReturnsPage';
 
+// Os fluxos de interface usam várias interações assíncronas de userEvent.
+jest.setTimeout(10000);
+
 function renderPage(page: React.ReactElement) {
   localStorage.clear();
   return render(<LibraryProvider>{page}</LibraryProvider>);
@@ -29,7 +32,7 @@ describe('interfaces da biblioteca', () => {
     expect(screen.queryByText(/C.digo Limpo/)).not.toBeInTheDocument();
   });
 
-  test('ReadersPage cadastra leitor válido e mostra validação de e-mail', async () => {
+  test('ReadersPage cadastra leitor válido e mostra validação de campo obrigatório', async () => {
     const user = userEvent.setup();
     renderPage(<ReadersPage />);
 

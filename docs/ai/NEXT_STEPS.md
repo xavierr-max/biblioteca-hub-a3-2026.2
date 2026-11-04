@@ -15,6 +15,7 @@ Esta proposta é planejamento; o backend não foi implementado nesta tarefa.
 
 - Completar testes visuais de edição/exclusão quando esses fluxos forem expostos pela `BooksPage`.
 - Aumentar cobertura de ramos raros do `LibraryContext` conforme novos fluxos forem alterados.
+- Manter `docs/TESTING_GUIDE.md` e `docs/TESTING_PRESENTATION.md` sincronizados quando a suíte evoluir.
 
 ## Estado da tarefa atual
 
