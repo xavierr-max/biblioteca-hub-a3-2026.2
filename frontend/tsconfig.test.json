@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "types": ["node", "jest"], "noEmit": true, "esModuleInterop": true, "allowSyntheticDefaultImports": true },
+  "include": ["src", "jest.config.cjs"],
+  "exclude": []
+}

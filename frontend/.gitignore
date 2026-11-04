@@ -6,6 +6,7 @@ build/
 .vite/
 vite.config.*.timestamp-*
 *.tsbuildinfo
+coverage/
 *-debug.log*
 logs/
 *.log
