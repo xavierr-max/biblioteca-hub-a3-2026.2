@@ -1,5 +1,17 @@
 # Testes
 
+## Fase 2 — resultados finais
+
+- `dotnet restore`: aprovado.
+- `dotnet build`: aprovado, 0 erros/avisos.
+- `dotnet test`: 10 testes unitários e 6 testes de integração aprovados.
+- `dotnet format --verify-no-changes --no-restore`: aprovado.
+- Frontend: 5 suítes/21 testes Jest aprovados, TypeScript aprovado e build Vite aprovado.
+
+## Fase 2 — integração HTTP
+
+Criado `backend/tests/Biblioteca.IntegrationTests` com xUnit, `WebApplicationFactory` e SQLite em memória isolado por teste. Os 6 casos exercitam lista vazia/com dados, consulta existente/inexistente, cadastro válido/inválido/duplicado, atualização, restrições de cópias e arquivamento.
+
 ## 2026-11-06 — Refatoração estrutural
 
 Após a reorganização dos arquivos e namespaces, `dotnet restore`, `dotnet build`, `dotnet test` e `dotnet format --verify-no-changes --no-restore` foram executados com sucesso. A suíte backend permanece com 10 testes aprovados.

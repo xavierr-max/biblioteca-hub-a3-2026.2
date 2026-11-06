@@ -2,6 +2,10 @@
 
 ## Relação com o plano de caixa preta
 
+### Demonstração do backend
+
+Apresente também `dotnet test backend/Biblioteca.sln`: os testes HTTP executam a API real com SQLite isolado, sem mocks do serviço de livros.
+
 Para a apresentação funcional, consulte [`BLACK_BOX_TEST_PLAN.md`](BLACK_BOX_TEST_PLAN.md), que contém 23 casos planejados, técnicas de caixa preta e roteiro de aproximadamente cinco minutos. Os casos ainda não executados permanecem separados dos 21 testes Jest automatizados.
 
 ## Ideia central

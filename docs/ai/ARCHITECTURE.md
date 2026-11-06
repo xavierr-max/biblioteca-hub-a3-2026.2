@@ -1,5 +1,7 @@
 # Arquitetura
 
+Os testes de integração são um projeto separado e usam a composição real da API, Application e Infrastructure com SQLite em memória; não substituem repositórios por mocks.
+
 ## Backend Fase 1
 
 O backend ASP.NET Core .NET 8 está em `backend/`, com camadas Domain, Application, Infrastructure e Api. EF Core/Npgsql persiste livros e exemplares; a API ainda não substitui o `localStorage` do frontend.

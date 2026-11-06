@@ -1,5 +1,11 @@
 # Próximos passos
 
+Revisar e então versionar o projeto `Biblioteca.IntegrationTests` e a correção de rastreamento de exemplares; não foi criado um segundo commit nesta tarefa.
+
+## Após Fase 2
+
+Revisar os testes HTTP e decidir se a expansão da quantidade de exemplares deve receber um caso dedicado; os testes atuais cobrem atualização, restrições negativas e a regra de exemplares emprestados permanece no domínio.
+
 ## Backend
 
 Disponibilizar PostgreSQL/Docker e aplicar a migration; adicionar leitores, empréstimos, devoluções e histórico; depois planejar cliente HTTP sem remover inicialmente o localStorage.

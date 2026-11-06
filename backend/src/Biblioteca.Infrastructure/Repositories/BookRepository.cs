@@ -14,6 +14,20 @@ public sealed class BookRepository(BibliotecaDbContext dbContext) : IBookReposit
     public async Task SaveAsync(Book book, CancellationToken cancellationToken = default)
     {
         if (dbContext.Entry(book).State == EntityState.Detached) dbContext.Books.Add(book);
+
+        foreach (var copy in book.Copies)
+        {
+            var entry = dbContext.Entry(copy);
+            if (entry.State == EntityState.Detached)
+            {
+                dbContext.Copies.Add(copy);
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                entry.State = EntityState.Unchanged;
+            }
+        }
+
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 }

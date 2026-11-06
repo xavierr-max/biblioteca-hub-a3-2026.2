@@ -2,6 +2,10 @@
 
 ## Plano funcional relacionado
 
+### Backend HTTP
+
+Os testes em `backend/tests/Biblioteca.IntegrationTests` usam `WebApplicationFactory` com SQLite em memória isolado por caso e cobrem os endpoints reais de livros.
+
 O plano de testes funcionais de caixa preta está em [`BLACK_BOX_TEST_PLAN.md`](BLACK_BOX_TEST_PLAN.md). Seus 23 casos são planejamento baseado em comportamento observável e não devem ser confundidos com os 21 testes Jest desta documentação.
 
 ## 1. Introdução

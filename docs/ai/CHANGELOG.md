@@ -1,5 +1,13 @@
 # Changelog do Codex
 
+## Fase 2 — resultados finais
+
+Os testes HTTP foram executados com 6 aprovações. A validação completa do backend passou; a expansão do projeto de integração permanece não commitada para revisão, conforme solicitado.
+
+## Fase 2 — testes de integração HTTP
+
+Adicionado o projeto `Biblioteca.IntegrationTests`, com banco SQLite isolado por caso e cobertura dos endpoints de livros. Corrigido o rastreamento de exemplares no repositório para evitar concorrência falsa no SQLite; nenhuma rota ou contrato foi alterado.
+
 ## 2026-11-06 — Backend ASP.NET Core Fase 1
 
 Criada solução .NET 8 em `backend/`, com catálogo de livros/exemplares, EF Core/Npgsql, migration inicial, endpoints REST e 6 testes xUnit aprovados. Criado `docs/BACKEND_GUIDE.md`.

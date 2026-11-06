@@ -1,5 +1,9 @@
 # Guia do backend
 
+## Testes HTTP
+
+`backend/tests/Biblioteca.IntegrationTests` usa xUnit, `WebApplicationFactory` e SQLite em memória isolado por teste. A composição real da API, Application e Infrastructure é exercitada sem mocks do serviço de livros.
+
 O backend usa .NET 8 LTS em camadas: Domain (entidades e invariantes), Application (DTOs e serviço), Infrastructure (EF Core/Npgsql/SQLite) e Api (Minimal API/Swagger). A Fase 1 cobre livros e exemplares; empréstimos, devoluções, leitores e autenticação permanecem planejados.
 
 O código segue uma classe principal por arquivo, namespaces file-scoped, nullable habilitado, métodos assíncronos com `Async`/`CancellationToken`, DTOs separados, mapeamentos EF em `IEntityTypeConfiguration<T>` e endpoints agrupados em extensões da API.
