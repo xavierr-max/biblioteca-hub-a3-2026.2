@@ -1,5 +1,13 @@
 # Testes
 
+## 2026-11-06 — Refatoração estrutural
+
+Após a reorganização dos arquivos e namespaces, `dotnet restore`, `dotnet build`, `dotnet test` e `dotnet format --verify-no-changes --no-restore` foram executados com sucesso. A suíte backend permanece com 10 testes aprovados.
+
+## Backend — 2026-11-06
+
+`dotnet restore`, `dotnet build` e `dotnet test` aprovados. A suíte agora tem 10 testes xUnit, incluindo 4 testes HTTP com `WebApplicationFactory` e SQLite em memória, cobrindo cadastro, ISBN, consulta, atualização, arquivamento e persistência no contexto real. A API foi executada com SQLite em arquivo e os endpoints foram exercitados; dados permaneceram após reinício. PostgreSQL não foi conectado/aplicado.
+
 ## Atualização — 2026-11-06 — Execução do plano de caixa preta
 
 - Executados por interface RTL: CT-LIV-005, CT-LEI-001, CT-LEI-002, CT-EMP-001, CT-DEV-001 e CT-HIS-001; os 6 foram aprovados.

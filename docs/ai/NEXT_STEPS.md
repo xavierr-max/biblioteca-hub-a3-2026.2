@@ -1,5 +1,13 @@
 # Próximos passos
 
+## Backend
+
+Disponibilizar PostgreSQL/Docker e aplicar a migration; adicionar leitores, empréstimos, devoluções e histórico; depois planejar cliente HTTP sem remover inicialmente o localStorage.
+
+SQLite já está disponível sem Docker para desenvolvimento e testes. PostgreSQL continua pendente de ambiente/credenciais para validação real.
+
+A organização estrutural foi concluída; futuras mudanças devem seguir o `.editorconfig` e a regra de uma classe principal por arquivo.
+
 ## Plano de caixa preta
 
 - Executar os 17 casos ainda não executados de `docs/BLACK_BOX_TEST_PLAN.md`, priorizando cadastro/edição de livros, validações negativas, bloqueios de empréstimo, devoluções inválidas e relatórios.

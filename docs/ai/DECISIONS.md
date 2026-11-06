@@ -1,5 +1,13 @@
 # Decisões arquiteturais
 
+## 2026-11-06 — .NET 8 e catálogo inicial
+
+Escolhido .NET 8 LTS disponível. O backend inicia por livros/exemplares, mantendo frontend e localStorage independentes; persistência fica isolada em Infrastructure.
+
+## 2026-11-06 — SQLite como provider de desenvolvimento
+
+Como Docker/PostgreSQL não estão disponíveis, SQLite foi escolhido apenas para desenvolvimento e testes. A seleção ocorre por `Database:Provider`; PostgreSQL e sua migration permanecem preservados para o ambiente definitivo.
+
 ## 2026-11-06 — Plano funcional separado dos testes automatizados
 
 Foi criado `docs/BLACK_BOX_TEST_PLAN.md` com casos baseados em comportamentos observáveis. Os casos planejados não recebem aprovação por causa dos 21 testes Jest; a execução automatizada existente é registrada apenas na matriz de rastreabilidade.

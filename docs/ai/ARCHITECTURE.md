@@ -1,5 +1,11 @@
 # Arquitetura
 
+## Backend Fase 1
+
+O backend ASP.NET Core .NET 8 está em `backend/`, com camadas Domain, Application, Infrastructure e Api. EF Core/Npgsql persiste livros e exemplares; a API ainda não substitui o `localStorage` do frontend.
+
+Cada classe principal possui arquivo próprio. DbContext, configurações EF e repositório estão separados em Infrastructure; DTOs, interfaces e serviços estão separados em Application; endpoints permanecem Minimal API, agrupados por extensão.
+
 ## Estrutura
 
 - `frontend/src/main.tsx`: entrada da aplicação.

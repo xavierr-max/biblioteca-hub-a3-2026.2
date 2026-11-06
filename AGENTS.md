@@ -43,6 +43,10 @@ Sempre que uma regra de negócio for alterada, revisar os testes relacionados, a
 
 Sempre que uma suíte for executada, registrar os resultados relevantes, a data da validação completa e distinguir métricas atuais de históricas. Nunca declarar validações não executadas.
 
+Para o backend, SQLite pode ser usado sem Docker em desenvolvimento e testes; PostgreSQL deve permanecer configurado como banco definitivo.
+
+Toda implementação futura em C#/.NET deverá respeitar a estrutura em camadas, utilizar uma classe principal por arquivo, aplicar o padrão de formatação estabelecido no `.editorconfig` e evitar concentração de responsabilidades em arquivos genéricos.
+
 Documentação antiga é apenas contexto: o código atual é a fonte de verdade. Não registrar credenciais, tokens ou dados sensíveis. Diferenciar claramente funcionalidades implementadas de planejadas.
 
 ## Plano de testes funcionais de caixa preta

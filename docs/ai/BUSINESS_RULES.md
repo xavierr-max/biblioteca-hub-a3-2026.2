@@ -1,5 +1,9 @@
 # Regras de negócio
 
+## Backend Fase 1
+
+Livros e exemplares são persistidos; ISBN é validado, normalizado e único. Cadastro cria exemplares disponíveis, atualização não reduz abaixo dos emprestados e arquivamento é exposto pela API. Empréstimos/devoluções ainda não foram implementados no backend.
+
 - ISBN-10 e ISBN-13 são validados por dígito de controle; hífens e espaços são removidos.
 - Livro exige título, autor e ISBN válidos; ISBN duplicado não é aceito.
 - A quantidade de exemplares não pode ser negativa. Reduções não removem exemplares emprestados.

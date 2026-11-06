@@ -1,5 +1,17 @@
 # Changelog do Codex
 
+## 2026-11-06 — Backend ASP.NET Core Fase 1
+
+Criada solução .NET 8 em `backend/`, com catálogo de livros/exemplares, EF Core/Npgsql, migration inicial, endpoints REST e 6 testes xUnit aprovados. Criado `docs/BACKEND_GUIDE.md`.
+
+## 2026-11-06 — SQLite sem Docker
+
+Adicionado provider SQLite 8.0.10, seleção configurável mantendo Npgsql, banco de desenvolvimento `biblioteca.dev.db` ignorado pelo Git e testes de integração com `WebApplicationFactory`/SQLite em memória. Validados restore, build, 10 testes xUnit e execução real da API.
+
+## 2026-11-06 — Refatoração estrutural do backend
+
+Separados arquivos e responsabilidades do domínio, aplicação, persistência e API. Contratos, endpoints, regras e migrations foram preservados. Adicionado `.editorconfig` do backend.
+
 ## 2026-11-06 — Execução do plano de caixa preta
 
 - Executados 6 dos 23 casos por testes de interface reais com React Testing Library e `user-event`; os 6 foram aprovados.
