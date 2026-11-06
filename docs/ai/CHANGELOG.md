@@ -55,3 +55,10 @@ Separados arquivos e responsabilidades do domínio, aplicação, persistência e
 - Implementado ciclo de emprestimos e devolucoes no backend, com entidade, DTOs, servico, repositorio, endpoints e migration `AddLoans`.
 - Adicionados testes unitarios e HTTP com SQLite.
 - Nenhum commit, push ou alteracao no frontend foi realizado.
+
+## 2026-11-06 - Fase 5.1
+
+- Criado cliente HTTP tipado para livros com configuracao `VITE_API_BASE_URL` e modo `VITE_DATA_MODE`.
+- Adicionada configuracao CORS de desenvolvimento para as origens Vite.
+- Integrados carregamento e cadastro de livros no modo API, mantendo modo local como padrao.
+- Adicionados testes Jest para sucesso, cadastro, erro HTTP e falha de conexao.

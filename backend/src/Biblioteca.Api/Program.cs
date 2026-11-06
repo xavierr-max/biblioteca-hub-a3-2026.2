@@ -14,6 +14,10 @@ builder.Services.AddDbContext<BibliotecaDbContext>(options =>
     if (provider.Equals("Postgres", StringComparison.OrdinalIgnoreCase)) options.UseNpgsql(connection);
     else options.UseSqlite(connection);
 });
+builder.Services.AddCors(options => options.AddPolicy("DevelopmentFrontend", policy =>
+    policy.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173")
+        .AllowAnyHeader()
+        .AllowAnyMethod()));
 builder.Services.AddInfrastructure();
 builder.Services.AddScoped<BookService>();
 builder.Services.AddScoped<ReaderService>();
@@ -22,6 +26,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+if (app.Environment.IsDevelopment()) app.UseCors("DevelopmentFrontend");
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<BibliotecaDbContext>();

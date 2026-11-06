@@ -99,3 +99,10 @@ Os testes de página cobrem os fluxos principais, mas não todos os caminhos de 
 - Integracao HTTP: 13 aprovados com SQLite em memoria isolado por `ApiFactory`.
 - Os testes cobrem cadastro, elegibilidade, datas, disponibilidade, devolucao unica, historico e persistencia.
 - `AddLoans` foi gerada com provider PostgreSQL; PostgreSQL nao foi conectado neste ambiente.
+
+## Fase 5.1 - resultados atuais
+
+- Testes Jest: 6 suites e 25 testes aprovados, incluindo `src/services/__tests__/bookService.test.ts`.
+- Os novos testes cobrem consulta, cadastro, erro HTTP e falha de conexao com `fetch` simulado.
+- TypeScript e build Vite aprovados apos a integracao do cliente HTTP.
+- Nenhum teste frontend usa a API real.

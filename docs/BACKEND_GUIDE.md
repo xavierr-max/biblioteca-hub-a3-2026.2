@@ -24,3 +24,9 @@ Endpoints: `GET /api/loans`, `GET /api/loans/{id}`, `POST /api/loans` e `POST /a
 `AddLoans` foi gerada com `dotnet-ef` 8.0.10 usando `Database__Provider=Postgres`, sem modificar migrations anteriores. SQLite usa `EnsureCreated` e memoria nos testes; PostgreSQL aplica migrations com `dotnet ef database update`.
 
 O indice unico filtrado por exemplar e a transacao EF Core impedem dois emprestimos abertos do mesmo exemplar. Concorrencia multi-processo com PostgreSQL ainda precisa ser validada em ambiente autorizado.
+
+## Integracao com o frontend - Fase 5.1
+
+O frontend inicia em modo `local` por padrao e continua usando `localStorage`. Para o modo API, copie `frontend/.env.example` para `frontend/.env.local` e defina `VITE_DATA_MODE=api` e `VITE_API_BASE_URL=http://localhost:5219`. Execute a API em `http://localhost:5219` e o Vite na porta configurada pelo projeto.
+
+No modo API, livros sao carregados por `GET /api/books` e cadastrados por `POST /api/books`; os exemplares retornados sao mapeados para o modelo TypeScript. A API e a fonte de verdade dos livros e nao ha fallback silencioso para `localStorage`. Leitores, emprestimos, devolucoes, edicao e arquivamento ainda permanecem locais nesta etapa; o modo API e experimental e nao migra dados automaticamente.

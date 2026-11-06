@@ -35,6 +35,10 @@ export const BooksPage: React.FC = () => {
     loans,
     globalSearch,
     addBook,
+    addBookAsync,
+    dataMode,
+    booksLoading,
+    booksError,
     updateBook,
     deleteBook,
     toggleArchiveBook,
@@ -168,7 +172,7 @@ export const BooksPage: React.FC = () => {
     setIsFormDrawerOpen(true);
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errors: Partial<Record<keyof BookFormData, string>> = {};
 
@@ -199,7 +203,7 @@ export const BooksPage: React.FC = () => {
         return;
       }
     } else {
-      const res = addBook(formData);
+      const res = dataMode === 'api' ? await addBookAsync(formData) : addBook(formData);
       if (!res.success) {
         setFormErrors({ isbn: res.error });
         return;
@@ -282,6 +286,15 @@ export const BooksPage: React.FC = () => {
         onSearchChange={setLocalSearch}
         searchPlaceholder="Filtrar por título, autor, ISBN ou categoria..."
       />
+
+      {dataMode === 'api' && booksLoading && (
+        <div className="p-4 text-sm text-[#6D5A4D]">Carregando livros pela API...</div>
+      )}
+      {dataMode === 'api' && booksError && (
+        <div className="p-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
+          {booksError}
+        </div>
+      )}
 
       <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
         {/* Filter and Control Bar */}

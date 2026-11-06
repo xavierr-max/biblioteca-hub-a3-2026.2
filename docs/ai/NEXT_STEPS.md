@@ -53,3 +53,7 @@ Uma pendência só deve ser marcada como concluída depois de implementação e 
 ## Apos Fase 4
 
 Emprestimos e devolucoes basicos estao implementados e validados em SQLite. Proximos passos: executar a migration em PostgreSQL autorizado, adicionar teste de concorrencia multi-processo no PostgreSQL e planejar integracao gradual do frontend sem remover `localStorage`.
+
+## Apos Fase 5.1
+
+Validar a tela real em modo API com a API e o Vite executando simultaneamente. Depois integrar atualizacao/arquivamento de livros e somente entao planejar a migracao coordenada de leitores e circulacao.

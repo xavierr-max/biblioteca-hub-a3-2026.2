@@ -32,3 +32,9 @@ As páginas reais são renderizadas sob `LibraryProvider` e exercitadas com `use
 - Persistir historico no registro `Loan`, sem entidade de movimentacao adicional.
 - Proteger emprestimos simultaneos do mesmo exemplar com transacao e indice unico filtrado por status nao devolvido.
 - Manter SQLite com `EnsureCreated` para desenvolvimento/testes e gerar migrations com PostgreSQL.
+
+## 2026-11-06 - Fase 5.1
+
+- Tornar a integracao API opt-in por `VITE_DATA_MODE`, preservando `localStorage` como modo padrao e evitando migracao automatica.
+- Integrar somente consulta/cadastro de livros nesta etapa; manter leitores e circulacao locais para evitar estado hibrido nao controlado.
+- Usar `fetch` tipado e sem dependencia HTTP adicional. O cliente nao faz fallback silencioso quando a API falha.

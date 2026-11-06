@@ -420,3 +420,6 @@ O escopo de `collectCoverageFrom` em `jest.config.cjs` inclui `src/context/Libra
 ## Backend - circulacao
 
 Execute `dotnet test backend/Biblioteca.sln`. Os testes HTTP usam `WebApplicationFactory`, SQLite em memoria e uma conexao aberta por `ApiFactory`, garantindo esquema real e isolamento entre casos. Cobrem emprestimo valido, leitor suspenso, datas, exemplar indisponivel, devolucao, devolucao duplicada, historico e disponibilidade.
+## Frontend - cliente HTTP de livros
+
+Os testes em `frontend/src/services/__tests__/bookService.test.ts` simulam `fetch` e cobrem listagem, cadastro, erro HTTP e falha de conexao. Rode `corepack pnpm@10 test` na pasta `frontend`; os testes nao dependem de API real.

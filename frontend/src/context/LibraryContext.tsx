@@ -8,6 +8,8 @@ import {
   INITIAL_USERS,
 } from '../data/mockData';
 import { applyReturnOperation } from '../domain/returnRules';
+import { dataMode } from '../services/apiConfig';
+import { createBook, listBooks } from '../services/bookService';
 
 interface ToastMessage {
   id: string;
@@ -60,6 +62,11 @@ interface LibraryContextType {
   removeToast: (id: string) => void;
   resetToDefaultData: () => void;
   addBook: (data: BookFormData) => { success: boolean; error?: string };
+  addBookAsync: (data: BookFormData) => Promise<{ success: boolean; error?: string }>;
+  reloadBooks: () => Promise<void>;
+  booksLoading: boolean;
+  booksError?: string;
+  dataMode: 'local' | 'api';
   updateBook: (id: string, data: BookFormData) => { success: boolean; error?: string };
   deleteBook: (id: string) => { success: boolean; error?: string; canArchiveInstead?: boolean };
   toggleArchiveBook: (id: string) => void;
@@ -152,8 +159,10 @@ export const LibraryProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   const [books, setBooks] = useState<Book[]>(() =>
-    loadFromStorage('books', INITIAL_BOOKS)
+    dataMode === 'api' ? [] : loadFromStorage('books', INITIAL_BOOKS)
   );
+  const [booksLoading, setBooksLoading] = useState(dataMode === 'api');
+  const [booksError, setBooksError] = useState<string>();
   const [copies, setCopies] = useState<BookCopy[]>(() =>
     loadFromStorage('copies', INITIAL_COPIES)
   );
@@ -170,6 +179,25 @@ export const LibraryProvider: React.FC<{ children: ReactNode }> = ({ children })
     const saved = loadFromStorage<User | null>('currentUser', null);
     return saved || INITIAL_USERS[0];
   });
+
+  const reloadBooks = async () => {
+    if (dataMode !== 'api') return;
+    setBooksLoading(true);
+    setBooksError(undefined);
+    try {
+      const result = await listBooks();
+      setBooks(result.books);
+      setCopies(result.copies);
+    } catch (error) {
+      setBooksError(error instanceof Error ? error.message : 'Não foi possível carregar os livros.');
+    } finally {
+      setBooksLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void reloadBooks();
+  }, []);
 
   // Recalculate book totals based on actual copies
   const syncBookAvailability = (allBooks: Book[], allCopies: BookCopy[]): Book[] => {
@@ -199,7 +227,7 @@ export const LibraryProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   // Persist state updates
   useEffect(() => {
-    saveToStorage('books', books);
+    if (dataMode === 'local') saveToStorage('books', books);
   }, [books]);
 
   useEffect(() => {
@@ -346,6 +374,19 @@ export const LibraryProvider: React.FC<{ children: ReactNode }> = ({ children })
     });
 
     return { success: true };
+  };
+
+  const addBookAsync = async (data: BookFormData) => {
+    if (dataMode === 'local') return addBook(data);
+    try {
+      const result = await createBook(data);
+      setBooks((previous) => [result.book, ...previous]);
+      setCopies((previous) => [...previous, ...result.copies]);
+      showToast({ title: 'Livro cadastrado', description: `"${result.book.title}" foi adicionado.`, variant: 'success' });
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Não foi possível cadastrar o livro.' };
+    }
   };
 
   const updateBook = (id: string, data: BookFormData): { success: boolean; error?: string } => {
@@ -969,6 +1010,10 @@ export const LibraryProvider: React.FC<{ children: ReactNode }> = ({ children })
         currentRoute,
         setCurrentRoute,
         books,
+        booksLoading,
+        booksError,
+        dataMode,
+        reloadBooks,
         copies,
         readers,
         loans,
@@ -982,6 +1027,7 @@ export const LibraryProvider: React.FC<{ children: ReactNode }> = ({ children })
         removeToast,
         resetToDefaultData,
         addBook,
+        addBookAsync,
         updateBook,
         deleteBook,
         toggleArchiveBook,

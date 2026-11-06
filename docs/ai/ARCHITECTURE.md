@@ -37,3 +37,7 @@ Os testes de página usam React Testing Library, `userEvent` e o `LibraryProvide
 `Loan` concentra o historico do emprestimo e a invariante de devolucao unica. `LoanService` orquestra leitor, livro e exemplar por `ILoanRepository`. O repositorio usa transacao EF Core e indice unico filtrado por exemplar.
 
 Nao foi criada entidade de movimentacao separada: o frontend deriva os eventos de emprestimo e devolucao do proprio `Loan`.
+
+## Fase 5.1 - integracao opt-in
+
+`frontend/src/services` separa configuracao, cliente HTTP e servico de livros. `VITE_DATA_MODE=local` mantem o fluxo atual; `VITE_DATA_MODE=api` faz o contexto carregar livros pela API e nao persistir livros no `localStorage`. O modo API ainda e limitado a livros/exemplares e nao mistura fontes para leitores, emprestimos ou devolucoes.
