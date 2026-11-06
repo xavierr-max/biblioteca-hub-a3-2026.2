@@ -45,6 +45,15 @@ Sempre que uma suíte for executada, registrar os resultados relevantes, a data 
 
 Documentação antiga é apenas contexto: o código atual é a fonte de verdade. Não registrar credenciais, tokens ou dados sensíveis. Diferenciar claramente funcionalidades implementadas de planejadas.
 
+## Plano de testes funcionais de caixa preta
+
+1. Toda nova funcionalidade relevante deve gerar ou revisar casos em `docs/BLACK_BOX_TEST_PLAN.md`.
+2. Alterações em regras de negócio devem atualizar os resultados esperados.
+3. Casos removidos devem ser identificados e revisados.
+4. Resultados obtidos somente podem ser registrados após execução real, com evidência.
+5. A matriz de rastreabilidade deve permanecer sincronizada com requisitos e testes automatizados.
+6. O plano deve ser atualizado em futuras tarefas que afetem funcionalidades ou testes.
+
 ## Contexto persistente
 
 - [Contexto do projeto](docs/ai/PROJECT_CONTEXT.md)

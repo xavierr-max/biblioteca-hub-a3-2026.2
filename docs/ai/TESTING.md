@@ -1,5 +1,22 @@
 # Testes
 
+## Atualização — 2026-11-06 — Execução do plano de caixa preta
+
+- Executados por interface RTL: CT-LIV-005, CT-LEI-001, CT-LEI-002, CT-EMP-001, CT-DEV-001 e CT-HIS-001; os 6 foram aprovados.
+- Permanecem 17 casos não executados; nenhum caso foi reclassificado como reprovado ou bloqueado.
+- `corepack pnpm@10 test`: 5 suítes e 21 testes aprovados, 0 falhas.
+- `corepack pnpm@10 test:coverage`: aprovado; 72,54% statements, 57,30% branches, 75,55% functions e 73,68% lines.
+- `corepack pnpm@10 exec tsc --noEmit`: aprovado.
+- `corepack pnpm@10 build`: aprovado; 1.980 módulos transformados.
+- Evidências detalhadas: `docs/BLACK_BOX_TEST_EXECUTION.md`.
+
+## Atualização — 2026-11-06
+
+- Criado `docs/BLACK_BOX_TEST_PLAN.md` com 23 casos: 7 de livros/acervo, 4 de leitores, 4 de empréstimos, 3 de devoluções, 2 de histórico e 3 de relatórios.
+- Nenhum caso manual foi executado nesta tarefa: 0 executados, 0 aprovados e 23 não executados no plano.
+- Os 21 testes Jest continuam sendo evidência automatizada separada e foram associados somente quando o arquivo e o nome real foram confirmados.
+- A análise atual confirmou o formulário e as ações de livros na `BooksPage`; a limitação antiga sobre ausência de formulário está obsoleta.
+
 Documentação didática completa: `docs/TESTING_GUIDE.md`. Resumo para apresentação: `docs/TESTING_PRESENTATION.md`.
 
 Validação pré-commit mais recente: 5 suítes e 21 testes aprovados; TypeScript e build de produção aprovados.

@@ -1,5 +1,9 @@
 # Biblioteca — Guia Técnico e Didático de Testes Automatizados
 
+## Plano funcional relacionado
+
+O plano de testes funcionais de caixa preta está em [`BLACK_BOX_TEST_PLAN.md`](BLACK_BOX_TEST_PLAN.md). Seus 23 casos são planejamento baseado em comportamento observável e não devem ser confundidos com os 21 testes Jest desta documentação.
+
 ## 1. Introdução
 
 Testes automatizados são programas que executam o código da aplicação e verificam, de forma repetível, se o comportamento observado corresponde ao comportamento esperado. Na Biblioteca, eles protegem regras como validação de ISBN, disponibilidade de exemplares, empréstimos, devoluções, cadastro de leitores e persistência do estado.

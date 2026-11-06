@@ -1,5 +1,9 @@
 # Decisões arquiteturais
 
+## 2026-11-06 — Plano funcional separado dos testes automatizados
+
+Foi criado `docs/BLACK_BOX_TEST_PLAN.md` com casos baseados em comportamentos observáveis. Os casos planejados não recebem aprovação por causa dos 21 testes Jest; a execução automatizada existente é registrada apenas na matriz de rastreabilidade.
+
 ## 2026-11-04 — Testes sem duplicação de regras
 
 As regras puras permanecem testadas diretamente em `domain/`; os fluxos que combinam estado, persistência e regras são exercitados pelo `LibraryContext` real em jsdom. Isso evita mocks que escondam regressões e não exige reescrever a aplicação.

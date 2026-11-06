@@ -1,5 +1,9 @@
 # Biblioteca — Resumo para apresentação de testes
 
+## Relação com o plano de caixa preta
+
+Para a apresentação funcional, consulte [`BLACK_BOX_TEST_PLAN.md`](BLACK_BOX_TEST_PLAN.md), que contém 23 casos planejados, técnicas de caixa preta e roteiro de aproximadamente cinco minutos. Os casos ainda não executados permanecem separados dos 21 testes Jest automatizados.
+
 ## Ideia central
 
 Os testes automatizados verificam se a Biblioteca continua respeitando suas regras: dados válidos entram, operações inválidas são bloqueadas e empréstimos/devoluções atualizam o acervo corretamente. A aplicação é React; as regras vivem no `LibraryContext` e em funções de domínio.

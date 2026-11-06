@@ -1,5 +1,19 @@
 # Changelog do Codex
 
+## 2026-11-06 — Execução do plano de caixa preta
+
+- Executados 6 dos 23 casos por testes de interface reais com React Testing Library e `user-event`; os 6 foram aprovados.
+- Criado `docs/BLACK_BOX_TEST_EXECUTION.md` com método, data, evidências e limitações observadas.
+- A suíte completa passou com 5 suítes/21 testes; cobertura, TypeScript e build também foram aprovados.
+- Os 17 casos restantes permanecem não executados; nenhum resultado foi presumido.
+
+## 2026-11-06
+
+- Criado `docs/BLACK_BOX_TEST_PLAN.md` com 23 casos funcionais de caixa preta, técnicas, rastreabilidade, resumo e roteiro de apresentação.
+- Atualizado `AGENTS.md` para exigir manutenção contínua do plano e dos resultados reais.
+- Confirmado no código atual que `BooksPage` possui cadastro/edição/exclusão/arquivamento e gestão de exemplares.
+- Nenhum caso foi marcado como aprovado; não houve execução manual nesta tarefa.
+
 ## 2026-11-04
 
 - Validação pré-commit dos guias de testes: 21 testes aprovados, TypeScript aprovado e build de produção aprovado.

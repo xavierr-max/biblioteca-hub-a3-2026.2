@@ -1,5 +1,11 @@
 # Próximos passos
 
+## Plano de caixa preta
+
+- Executar os 17 casos ainda não executados de `docs/BLACK_BOX_TEST_PLAN.md`, priorizando cadastro/edição de livros, validações negativas, bloqueios de empréstimo, devoluções inválidas e relatórios.
+- Manter `docs/BLACK_BOX_TEST_EXECUTION.md` sincronizado com cada nova execução.
+- Revisar a matriz sempre que nomes/arquivos de testes Jest ou requisitos mudarem.
+
 ## Backend ASP.NET Core — proposta inicial (não implementada)
 
 - Criar uma solução ASP.NET Core Web API separada, com camadas `Api`, `Application`, `Domain` e `Infrastructure`.
