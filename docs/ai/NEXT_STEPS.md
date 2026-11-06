@@ -1,5 +1,7 @@
 # Próximos passos
 
+Após a gestão de leitores, a próxima etapa é implementar empréstimos, mantendo as restrições de leitor regular, livro ativo, exemplar disponível e datas válidas já documentadas. A API de leitores não inclui exclusão nesta fase porque o frontend condiciona essa operação ao histórico de empréstimos, ainda não persistido no backend.
+
 Revisar e então versionar o projeto `Biblioteca.IntegrationTests` e a correção de rastreamento de exemplares; não foi criado um segundo commit nesta tarefa.
 
 ## Após Fase 2

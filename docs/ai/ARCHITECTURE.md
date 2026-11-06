@@ -1,5 +1,9 @@
 # Arquitetura
 
+## Fase 3 — leitores
+
+Leitores seguem o mesmo fluxo em camadas dos livros: entidade e validações no Domain, DTOs/interface/serviço em Application, configuração EF/DbSet/repositório em Infrastructure e endpoints agrupados em `ReaderEndpointExtensions`.
+
 Os testes de integração são um projeto separado e usam a composição real da API, Application e Infrastructure com SQLite em memória; não substituem repositórios por mocks.
 
 ## Backend Fase 1

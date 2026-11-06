@@ -1,5 +1,12 @@
 # Testes
 
+## Fase 3 — resultados
+
+- Unitários backend: 16 aprovados, incluindo entidade, campos obrigatórios, contatos e status de leitores.
+- Integração HTTP backend: 10 aprovados, incluindo os 6 casos de livros e 4 casos de leitores com SQLite isolado.
+- `dotnet restore`, `dotnet build`, `dotnet test` e `dotnet format --verify-no-changes --no-restore`: aprovados.
+- Frontend: 5 suítes/21 testes Jest aprovados, TypeScript aprovado e build Vite aprovado.
+
 ## Fase 2 — resultados finais
 
 - `dotnet restore`: aprovado.

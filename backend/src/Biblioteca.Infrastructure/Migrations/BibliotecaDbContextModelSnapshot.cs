@@ -22,7 +22,7 @@ namespace Biblioteca.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Biblioteca.Domain.Book", b =>
+            modelBuilder.Entity("Biblioteca.Domain.Entities.Book", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -66,7 +66,7 @@ namespace Biblioteca.Infrastructure.Migrations
                     b.ToTable("Books");
                 });
 
-            modelBuilder.Entity("Biblioteca.Domain.BookCopy", b =>
+            modelBuilder.Entity("Biblioteca.Domain.Entities.BookCopy", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -95,16 +95,61 @@ namespace Biblioteca.Infrastructure.Migrations
                     b.ToTable("Copies");
                 });
 
-            modelBuilder.Entity("Biblioteca.Domain.BookCopy", b =>
+            modelBuilder.Entity("Biblioteca.Domain.Entities.Reader", b =>
                 {
-                    b.HasOne("Biblioteca.Domain.Book", null)
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ActiveLoansCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Course")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Identifier")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly>("RegistrationDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Identifier")
+                        .IsUnique();
+
+                    b.ToTable("Readers");
+                });
+
+            modelBuilder.Entity("Biblioteca.Domain.Entities.BookCopy", b =>
+                {
+                    b.HasOne("Biblioteca.Domain.Entities.Book", null)
                         .WithMany("Copies")
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Biblioteca.Domain.Book", b =>
+            modelBuilder.Entity("Biblioteca.Domain.Entities.Book", b =>
                 {
                     b.Navigation("Copies");
                 });

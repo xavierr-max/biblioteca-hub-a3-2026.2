@@ -16,6 +16,7 @@ builder.Services.AddDbContext<BibliotecaDbContext>(options =>
 });
 builder.Services.AddInfrastructure();
 builder.Services.AddScoped<BookService>();
+builder.Services.AddScoped<ReaderService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -30,6 +31,7 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 app.MapBookEndpoints();
+app.MapReaderEndpoints();
 app.Run();
 
 public partial class Program { }

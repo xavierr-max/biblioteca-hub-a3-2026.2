@@ -1,5 +1,14 @@
 # Regras de negócio
 
+## Leitores — Fase 3
+
+- Nome e identificador são obrigatórios.
+- Identificador é único sem diferenciação entre maiúsculas e minúsculas.
+- E-mail vazio é permitido; quando preenchido, exige formato `usuario@dominio.extensão`.
+- Telefone vazio é permitido; quando preenchido, aceita entre 8 e 13 dígitos após remover formatação.
+- Novo leitor inicia como `REGULAR`; o status pode ser alterado para `SUSPENDED`, `BLOCKED` ou `REGULAR` pela API.
+- Empréstimos, exclusão condicionada por histórico e contadores de empréstimos permanecem fora desta fase.
+
 ## Backend Fase 1
 
 Livros e exemplares são persistidos; ISBN é validado, normalizado e único. Cadastro cria exemplares disponíveis, atualização não reduz abaixo dos emprestados e arquivamento é exposto pela API. Empréstimos/devoluções ainda não foram implementados no backend.

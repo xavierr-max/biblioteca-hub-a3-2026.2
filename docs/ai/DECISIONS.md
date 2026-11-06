@@ -1,5 +1,9 @@
 # Decisões arquiteturais
 
+## Fase 3 — leitores
+
+Reader foi modelado sem dependência de EF Core. O status é uma enumeração persistida como texto e o identificador recebe índice único; a validação case-insensitive permanece no serviço para refletir o comportamento do frontend em SQLite e PostgreSQL.
+
 ## 2026-11-06 — .NET 8 e catálogo inicial
 
 Escolhido .NET 8 LTS disponível. O backend inicia por livros/exemplares, mantendo frontend e localStorage independentes; persistência fica isolada em Infrastructure.

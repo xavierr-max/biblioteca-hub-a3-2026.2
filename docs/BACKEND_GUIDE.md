@@ -1,5 +1,9 @@
 # Guia do backend
 
+## Gestão de leitores — Fase 3
+
+Endpoints disponíveis: `GET /api/readers?search=`, `GET /api/readers/{id}`, `POST /api/readers`, `PUT /api/readers/{id}` e `PATCH /api/readers/{id}/status`. O cadastro exige nome e identificador, valida e-mail/telefone opcionais, inicia em `REGULAR` e impede identificadores duplicados sem diferenciar maiúsculas/minúsculas. O status aceita `REGULAR`, `SUSPENDED` e `BLOCKED`.
+
 ## Testes HTTP
 
 `backend/tests/Biblioteca.IntegrationTests` usa xUnit, `WebApplicationFactory` e SQLite em memória isolado por teste. A composição real da API, Application e Infrastructure é exercitada sem mocks do serviço de livros.

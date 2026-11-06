@@ -2,6 +2,10 @@
 
 ## Plano funcional relacionado
 
+### Fase 3 — leitores
+
+Os testes backend cobrem cadastro, obrigatoriedade, contatos inválidos, identificador duplicado, consulta, edição e alteração de status usando HTTP real e SQLite isolado.
+
 ### Backend HTTP
 
 Os testes em `backend/tests/Biblioteca.IntegrationTests` usam `WebApplicationFactory` com SQLite em memória isolado por caso e cobrem os endpoints reais de livros.

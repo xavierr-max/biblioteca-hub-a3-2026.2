@@ -2,6 +2,10 @@
 
 ## Relação com o plano de caixa preta
 
+### Demonstração de leitores
+
+Apresente um `POST /api/readers`, uma tentativa inválida, um `PUT` e dois `PATCH` de status. O banco de integração é SQLite em memória e cada caso cria uma fábrica isolada.
+
 ### Demonstração do backend
 
 Apresente também `dotnet test backend/Biblioteca.sln`: os testes HTTP executam a API real com SQLite isolado, sem mocks do serviço de livros.

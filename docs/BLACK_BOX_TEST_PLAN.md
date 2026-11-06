@@ -1,5 +1,9 @@
 # Plano de Testes Funcionais de Caixa Preta — Sistema Biblioteca
 
+## Casos de API — gestão de leitores
+
+Os endpoints de leitores devem ser cobertos por cadastro válido/inválido, identificador duplicado, consulta, edição e desativação/reativação. Os resultados automatizados da Fase 3 estão registrados em `docs/ai/TESTING.md`; os casos funcionais permanecem planejamento até execução dedicada.
+
 ## 1. Identificação
 
 | Item | Informação |

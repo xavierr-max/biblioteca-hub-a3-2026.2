@@ -1,5 +1,9 @@
 # Changelog do Codex
 
+## Fase 3 — gestão de leitores
+
+Implementados entidade Reader, validações, DTOs, serviço, repositório, configuração EF, endpoints HTTP e migration PostgreSQL `AddReaders`. Adicionados testes unitários e de integração SQLite. Frontend não foi alterado.
+
 ## Fase 2 — resultados finais
 
 Os testes HTTP foram executados com 6 aprovações. A validação completa do backend passou; a expansão do projeto de integração permanece não commitada para revisão, conforme solicitado.
