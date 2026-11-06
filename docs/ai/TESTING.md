@@ -91,3 +91,11 @@ O Jest emite apenas o aviso TS151001 do ts-jest sobre `esModuleInterop`; não im
 ## Lacunas
 
 Os testes de página cobrem os fluxos principais, mas não todos os caminhos de edição/exclusão visual. A `BooksPage` atualmente não renderiza um drawer de cadastro/edição/exclusão; esses fluxos seguem cobertos no contexto. Permanecem ramos menos frequentes sem cobertura total.
+## Fase 4 - resultados atuais (2026-11-06)
+
+- `dotnet restore backend/Biblioteca.sln`: aprovado.
+- `dotnet build backend/Biblioteca.sln`: aprovado, 0 erros e 0 avisos.
+- Unitarios backend: 19 aprovados.
+- Integracao HTTP: 13 aprovados com SQLite em memoria isolado por `ApiFactory`.
+- Os testes cobrem cadastro, elegibilidade, datas, disponibilidade, devolucao unica, historico e persistencia.
+- `AddLoans` foi gerada com provider PostgreSQL; PostgreSQL nao foi conectado neste ambiente.

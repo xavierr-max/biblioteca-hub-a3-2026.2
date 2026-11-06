@@ -50,3 +50,6 @@ Confirmar o escopo de cadastro/edição/exclusão visual de livros e, depois, ev
 ## Critério de conclusão
 
 Uma pendência só deve ser marcada como concluída depois de implementação e execução verificável dos testes correspondentes.
+## Apos Fase 4
+
+Emprestimos e devolucoes basicos estao implementados e validados em SQLite. Proximos passos: executar a migration em PostgreSQL autorizado, adicionar teste de concorrencia multi-processo no PostgreSQL e planejar integracao gradual do frontend sem remover `localStorage`.

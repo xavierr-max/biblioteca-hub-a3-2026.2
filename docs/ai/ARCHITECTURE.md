@@ -32,3 +32,8 @@ Cada classe principal possui arquivo próprio. DbContext, configurações EF e r
 Regras que não dependem de React devem permanecer em funções puras em `domain/`. Testes ficam próximos ao módulo em `__tests__`. Não duplicar regras do contexto nos componentes.
 
 Os testes de página usam React Testing Library, `userEvent` e o `LibraryProvider` real em jsdom. O setup compartilhado fica em `src/test-setup.ts`.
+## Fase 4 - circulacao
+
+`Loan` concentra o historico do emprestimo e a invariante de devolucao unica. `LoanService` orquestra leitor, livro e exemplar por `ILoanRepository`. O repositorio usa transacao EF Core e indice unico filtrado por exemplar.
+
+Nao foi criada entidade de movimentacao separada: o frontend deriva os eventos de emprestimo e devolucao do proprio `Loan`.

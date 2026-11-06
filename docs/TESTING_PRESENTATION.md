@@ -134,3 +134,6 @@ Entidades e casos de uso poderiam ter testes xUnit; persistência e endpoints te
 ## Referência completa
 
 Consulte [`TESTING_GUIDE.md`](TESTING_GUIDE.md) para a explicação individual dos 21 testes, arquitetura, cobertura, limitações e detalhes de execução.
+### Demonstracao backend
+
+Apresente `POST /api/loans`, consulte `GET /api/loans`, execute `POST /return` e consulte novamente para evidenciar historico persistido e liberacao do exemplar. A cobertura automatizada esta em `LoansApiIntegrationTests`.

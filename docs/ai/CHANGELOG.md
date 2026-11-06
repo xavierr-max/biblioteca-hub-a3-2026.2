@@ -50,3 +50,8 @@ Separados arquivos e responsabilidades do domínio, aplicação, persistência e
 - Configurado o Jest para descobrir testes `.ts` e `.tsx` e o ambiente React 19 `act`.
 - Verificados Jest, cobertura, TypeScript e build; 17 testes passaram e a cobertura geral foi 72,54%.
 - Instalados React Testing Library, jest-dom e user-event; 5 suítes e 21 testes passaram, com TypeScript e build aprovados.
+## 2026-11-06 - Fase 4
+
+- Implementado ciclo de emprestimos e devolucoes no backend, com entidade, DTOs, servico, repositorio, endpoints e migration `AddLoans`.
+- Adicionados testes unitarios e HTTP com SQLite.
+- Nenhum commit, push ou alteracao no frontend foi realizado.

@@ -417,3 +417,6 @@ O escopo de `collectCoverageFrom` em `jest.config.cjs` inclui `src/context/Libra
 - O aviso TS151001 do ts-jest sobre `esModuleInterop` não impede as validações atuais.
 - O futuro backend ASP.NET Core pode adicionar testes unitários e de integração com xUnit para domínio, casos de uso, persistência e endpoints.
 - A documentação deve ser atualizada sempre que testes, regras de negócio ou comandos de validação mudarem.
+## Backend - circulacao
+
+Execute `dotnet test backend/Biblioteca.sln`. Os testes HTTP usam `WebApplicationFactory`, SQLite em memoria e uma conexao aberta por `ApiFactory`, garantindo esquema real e isolamento entre casos. Cobrem emprestimo valido, leitor suspenso, datas, exemplar indisponivel, devolucao, devolucao duplicada, historico e disponibilidade.

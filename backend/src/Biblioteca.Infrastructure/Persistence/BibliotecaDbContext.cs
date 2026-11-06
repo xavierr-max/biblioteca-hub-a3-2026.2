@@ -8,6 +8,7 @@ public sealed class BibliotecaDbContext(DbContextOptions<BibliotecaDbContext> op
     public DbSet<Book> Books => Set<Book>();
     public DbSet<BookCopy> Copies => Set<BookCopy>();
     public DbSet<Reader> Readers => Set<Reader>();
+    public DbSet<Loan> Loans => Set<Loan>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

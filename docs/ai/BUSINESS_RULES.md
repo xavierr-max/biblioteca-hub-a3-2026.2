@@ -24,3 +24,11 @@ Livros e exemplares são persistidos; ISBN é validado, normalizado e único. Ca
 - Devolução precisa referenciar empréstimo aberto, exemplar compatível e data não futura nem anterior ao empréstimo.
 - Devolução marca o empréstimo como `RETURNED`, libera o exemplar e recalcula disponibilidade/quantidade de empréstimos do leitor.
 - Um exemplar emprestado não pode ser manualmente marcado como disponível antes da devolução.
+## Emprestimos e devolucoes
+
+- Somente leitor `REGULAR` pode iniciar emprestimo.
+- Somente exemplar `AVAILABLE` de livro nao arquivado pode ser emprestado.
+- `LoanDate` nao pode ser futura e `DueDate` deve ser posterior.
+- Um exemplar nao pode ter mais de um emprestimo aberto; devolucao libera o exemplar e decrementa os emprestimos ativos do leitor.
+- Devolucao deve ser unica, nao futura e nao anterior ao emprestimo.
+- `OVERDUE` e status derivado para emprestimo ativo vencido.

@@ -15,3 +15,12 @@ O código segue uma classe principal por arquivo, namespaces file-scoped, nullab
 Sem Docker, a configuração padrão usa SQLite em `backend/biblioteca.dev.db`: execute `dotnet restore`, `dotnet run --project src/Biblioteca.Api` e a API cria as tabelas, índices e restrições automaticamente. Para PostgreSQL, defina `Database__Provider=Postgres` e `ConnectionStrings__Biblioteca`, depois execute `dotnet ef database update --project src/Biblioteca.Infrastructure --startup-project src/Biblioteca.Api`.
 
 Endpoints: `GET /api/books?search=`, `GET /api/books/{id}`, `POST /api/books`, `PUT /api/books/{id}` e `POST /api/books/{id}/archive`. ISBN-10/ISBN-13 é validado, normalizado e único; cadastro cria exemplares disponíveis e atualização respeita exemplares emprestados. A migration `InitialCreate` existente é PostgreSQL; SQLite usa `EnsureCreated` para não aplicar SQL de migration de outro provider. Testes xUnit ficam em `tests/Biblioteca.UnitTests`.
+## Fase 4 - emprestimos e devolucoes
+
+O ciclo de circulacao e persistido em `Loan`, que preserva livro, exemplar, leitor, datas, status e devolucao. A API deriva `OVERDUE` para emprestimos ativos vencidos, sem tabela de movimentos redundante.
+
+Endpoints: `GET /api/loans`, `GET /api/loans/{id}`, `POST /api/loans` e `POST /api/loans/{id}/return`. A listagem aceita `?status=ACTIVE|OVERDUE|RETURNED`. O emprestimo exige leitor `REGULAR`, livro nao arquivado, exemplar disponivel, data nao futura e prazo posterior. A devolucao exige registro aberto, exemplar emprestado e data entre o emprestimo e hoje.
+
+`AddLoans` foi gerada com `dotnet-ef` 8.0.10 usando `Database__Provider=Postgres`, sem modificar migrations anteriores. SQLite usa `EnsureCreated` e memoria nos testes; PostgreSQL aplica migrations com `dotnet ef database update`.
+
+O indice unico filtrado por exemplar e a transacao EF Core impedem dois emprestimos abertos do mesmo exemplar. Concorrencia multi-processo com PostgreSQL ainda precisa ser validada em ambiente autorizado.

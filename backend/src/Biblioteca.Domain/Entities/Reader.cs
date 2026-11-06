@@ -41,5 +41,21 @@ public sealed class Reader
 
     public void SetStatus(ReaderStatus status) => Status = status;
 
+    public void RegisterLoan()
+    {
+        if (Status != ReaderStatus.Regular)
+            throw new DomainException("O leitor não está elegível para realizar empréstimos.");
+
+        ActiveLoansCount++;
+    }
+
+    public void RegisterReturn()
+    {
+        if (ActiveLoansCount == 0)
+            throw new DomainException("O leitor não possui empréstimos ativos para esta devolução.");
+
+        ActiveLoansCount--;
+    }
+
     private static string? NormalizeOptional(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }

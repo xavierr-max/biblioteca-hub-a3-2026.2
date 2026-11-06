@@ -27,4 +27,20 @@ public sealed class BookCopy
         Status = status;
         if (location is not null) Location = location.Trim();
     }
+
+    public void MarkAsLoaned()
+    {
+        if (Status != CopyStatus.Available)
+            throw new DomainException($"O exemplar {Code} não está disponível para empréstimo.");
+
+        Status = CopyStatus.Loaned;
+    }
+
+    public void ReleaseFromReturn()
+    {
+        if (Status != CopyStatus.Loaned)
+            throw new DomainException($"O exemplar {Code} não está marcado como emprestado.");
+
+        Status = CopyStatus.Available;
+    }
 }

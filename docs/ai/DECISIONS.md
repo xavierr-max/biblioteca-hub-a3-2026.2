@@ -27,3 +27,8 @@ O contexto persistente usa Markdown versionado em `docs/ai/`, com `AGENTS.md` co
 ## 2026-11-04 — Integração de páginas com Testing Library
 
 As páginas reais são renderizadas sob `LibraryProvider` e exercitadas com `userEvent`; regras e persistência não são substituídas por mocks.
+## 2026-11-06 - Fase 4
+
+- Persistir historico no registro `Loan`, sem entidade de movimentacao adicional.
+- Proteger emprestimos simultaneos do mesmo exemplar com transacao e indice unico filtrado por status nao devolvido.
+- Manter SQLite com `EnsureCreated` para desenvolvimento/testes e gerar migrations com PostgreSQL.
