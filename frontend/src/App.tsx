@@ -4,7 +4,7 @@ import './index.css'
 import './modal.css'
 
 function App() {
-  const [active, setActive] = useState('Dashboard')
+  const [active, setActive] = useState(() => localStorage.getItem('biblioteca.activeSection') ?? 'Dashboard')
   const [search, setSearch] = useState('')
   const [books, setBooks] = useState<Book[]>([])
   const [readers, setReaders] = useState<Reader[]>([])
@@ -20,38 +20,39 @@ function App() {
   const [loanForm, setLoanForm] = useState({ readerId: '1', copyId: '1' })
   const [returnMessage, setReturnMessage] = useState('')
   const [formMessage, setFormMessage] = useState('')
-  useEffect(() => {
-    Promise.all([libraryApi.books(), libraryApi.readers(), libraryApi.copies(), libraryApi.loans()])
-      .then(([bookData, readerData, copyData, loanData]) => { setBooks(bookData); setReaders(readerData); setCopies(copyData); setLoans(loanData) })
-      .catch(() => undefined)
-  }, [])
+  async function reloadData() {
+    const [bookData, readerData, copyData, loanData] = await Promise.all([libraryApi.books(), libraryApi.readers(), libraryApi.copies(), libraryApi.loans()])
+    setBooks(bookData); setReaders(readerData); setCopies(copyData); setLoans(loanData)
+  }
+  useEffect(() => { void reloadData().catch(() => undefined) }, [])
+  function navigate(section: string) { setActive(section); localStorage.setItem('biblioteca.activeSection', section) }
   const filtered = books.filter((book) => `${book.title} ${book.isbn13}`.toLowerCase().includes(search.toLowerCase()))
   const activeLoans = loans.filter((loan) => !loan.returnedAt)
   const availableCopies = copies.filter((copy) => copy.status === 'Available').length
   const overdueLoans = activeLoans.filter((loan) => new Date(loan.dueAt) < new Date()).length
   async function submitBook(event: FormEvent) {
     event.preventDefault(); setFormMessage('Salvando...')
-    try { await libraryApi.createBook({ ...bookForm, categoryId: Number(bookForm.categoryId) }); setFormMessage('Livro cadastrado.'); setShowBookForm(false); setBookForm({ title: '', isbn13: '', categoryId: '1' }) }
+    try { await libraryApi.createBook({ ...bookForm, categoryId: Number(bookForm.categoryId) }); await reloadData(); setFormMessage('Livro cadastrado.'); setShowBookForm(false); setBookForm({ title: '', isbn13: '', categoryId: '1' }) }
     catch { setFormMessage('Não foi possível salvar. Verifique a API.') }
   }
   async function submitReader(event: FormEvent) {
     event.preventDefault(); setFormMessage('Salvando...')
-    try { await libraryApi.createReader(readerForm); setFormMessage('Leitor cadastrado.'); setShowReaderForm(false); setReaderForm({ fullName: '', registrationNumber: '' }) }
+    try { await libraryApi.createReader(readerForm); await reloadData(); setFormMessage('Leitor cadastrado.'); setShowReaderForm(false); setReaderForm({ fullName: '', registrationNumber: '' }) }
     catch { setFormMessage('Não foi possível salvar. Verifique a API.') }
   }
   async function submitCopy(event: FormEvent) {
     event.preventDefault(); setFormMessage('Salvando...')
-    try { await libraryApi.createCopy({ bookId: Number(copyForm.bookId), inventoryCode: copyForm.inventoryCode }); setFormMessage('Exemplar cadastrado.'); setShowCopyForm(false); setCopyForm({ bookId: '1', inventoryCode: '' }) }
+    try { await libraryApi.createCopy({ bookId: Number(copyForm.bookId), inventoryCode: copyForm.inventoryCode }); await reloadData(); setFormMessage('Exemplar cadastrado.'); setShowCopyForm(false); setCopyForm({ bookId: '1', inventoryCode: '' }) }
     catch { setFormMessage('Não foi possível salvar. Verifique o livro e a API.') }
   }
   async function submitLoan(event: FormEvent) {
     event.preventDefault(); setFormMessage('Registrando empréstimo...')
-    try { await libraryApi.createLoan({ readerId: Number(loanForm.readerId), copyId: Number(loanForm.copyId) }); setFormMessage('Empréstimo registrado por 14 dias.'); setShowLoanForm(false); setLoanForm({ readerId: '1', copyId: '1' }) }
+    try { await libraryApi.createLoan({ readerId: Number(loanForm.readerId), copyId: Number(loanForm.copyId) }); await reloadData(); setFormMessage('Empréstimo registrado por 14 dias.'); setShowLoanForm(false); setLoanForm({ readerId: '1', copyId: '1' }) }
     catch { setFormMessage('Não foi possível registrar. Confirme leitor e exemplar disponíveis.') }
   }
   async function registerReturn(loanId: number) {
     setReturnMessage('Registrando devolução...')
-    try { await libraryApi.returnLoan(loanId); setReturnMessage('Devolução registrada com sucesso.') }
+    try { await libraryApi.returnLoan(loanId); await reloadData(); setReturnMessage('Devolução registrada com sucesso.') }
     catch { setReturnMessage('Não foi possível registrar a devolução. Confirme o ID do empréstimo.') }
   }
 
@@ -62,7 +63,7 @@ function App() {
         <div className="workspace-label">GESTÃO</div>
         <nav>
           {['Dashboard', 'Livros', 'Leitores', 'Exemplares', 'Empréstimos', 'Relatórios'].map((item, index) => (
-            <button className={`nav-item ${active === item ? 'active' : ''}`} onClick={() => setActive(item)} key={item}>
+            <button className={`nav-item ${active === item ? 'active' : ''}`} onClick={() => navigate(item)} key={item}>
               <span className="nav-icon">{['✦', '▣', '♙', '▤', '↗', '◒'][index]}</span>{item}
             </button>
           ))}
