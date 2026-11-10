@@ -1,0 +1,55 @@
+import { useState } from 'react'
+import './index.css'
+
+const books = [
+  { title: 'Clean Code', author: 'Robert C. Martin', category: 'Tecnologia', status: 'Disponível', color: 'coral' },
+  { title: 'Dom Casmurro', author: 'Machado de Assis', category: 'Literatura', status: 'Emprestado', color: 'cream' },
+  { title: 'O Design do Dia a Dia', author: 'Don Norman', category: 'Design', status: 'Disponível', color: 'orange' },
+]
+
+function App() {
+  const [active, setActive] = useState('Dashboard')
+  const [search, setSearch] = useState('')
+  const filtered = books.filter((book) => `${book.title} ${book.author}`.toLowerCase().includes(search.toLowerCase()))
+
+  return (
+    <div className="app-shell">
+      <aside className="sidebar">
+        <div className="brand"><span className="brand-mark">b</span> biblioteca</div>
+        <div className="workspace-label">GESTÃO</div>
+        <nav>
+          {['Dashboard', 'Livros', 'Leitores', 'Empréstimos', 'Relatórios'].map((item, index) => (
+            <button className={`nav-item ${active === item ? 'active' : ''}`} onClick={() => setActive(item)} key={item}>
+              <span className="nav-icon">{['✦', '▣', '♙', '↗', '◒'][index]}</span>{item}
+            </button>
+          ))}
+        </nav>
+        <div className="sidebar-bottom">
+          <div className="upgrade-card"><span className="spark">✦</span><strong>Biblioteca em movimento</strong><small>Organize seu acervo com clareza.</small><button>Explorar recursos ↗</button></div>
+          <button className="nav-item"><span className="nav-icon">⚙</span>Configurações</button>
+          <div className="profile"><div className="avatar">MS</div><div><strong>Marina Silva</strong><small>Bibliotecária</small></div><span>•••</span></div>
+        </div>
+      </aside>
+
+      <main className="main-content">
+        <header className="topbar"><div className="search"><span>⌕</span><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar livros, leitores..." /></div><div className="top-actions"><span className="notification">◌<i /></span><div className="mini-avatar">MS</div></div></header>
+
+        <section className="content-wrap">
+          <div className="eyebrow">{active === 'Dashboard' ? 'VISÃO GERAL' : 'CATÁLOGO DA BIBLIOTECA'}</div>
+          <div className="heading-row"><div><h1>{active === 'Dashboard' ? 'Olá, Marina.' : active}</h1><p>{active === 'Dashboard' ? 'Aqui está o que está acontecendo na sua biblioteca hoje.' : 'Acompanhe e organize seu acervo com simplicidade.'}</p></div><button className="primary-btn">+ Novo registro</button></div>
+
+          <div className="hero-grid"><div className="hero-card"><div><span className="hero-kicker">RESUMO DO DIA</span><h2>Seu acervo está<br /><em>ganhando vida.</em></h2><p>12 novos empréstimos foram registrados esta semana.</p><button className="light-btn">Ver movimentações ↗</button></div><div className="hero-art"><div className="book-shape one">A</div><div className="book-shape two">B</div><div className="book-shape three">C</div></div></div><div className="stats-card"><div className="card-label">ATIVIDADE <span>•••</span></div><div className="big-number">24 <small>+18%</small></div><p>empréstimos este mês</p><div className="bars">{[35, 54, 42, 75, 58, 88, 68, 96, 74, 100].map((height, i) => <span key={i} style={{ height: `${height}%` }} className={i === 9 ? 'highlight' : ''} />)}</div><div className="bar-labels"><span>01</span><span>10</span><span>20</span><span>30</span></div></div></div>
+
+          <div className="section-heading"><h2>Seu espaço hoje</h2><button className="text-btn">Ver relatórios ↗</button></div>
+          <div className="metric-grid"><Metric value="248" label="livros no acervo" accent="orange" icon="▣" /><Metric value="86" label="leitores ativos" accent="cream" icon="♙" /><Metric value="12" label="empréstimos ativos" accent="coral" icon="↗" /><Metric value="03" label="devoluções atrasadas" accent="dark" icon="◷" /></div>
+
+          <div className="lower-grid"><section className="panel"><div className="section-heading"><h2>Livros recentes</h2><button className="text-btn">Ver catálogo ↗</button></div><div className="book-list">{filtered.map((book) => <div className="book-row" key={book.title}><div className={`book-cover ${book.color}`}>{book.title.split(' ').map((word) => <span key={word}>{word}</span>)}</div><div className="book-info"><strong>{book.title}</strong><small>{book.author} · {book.category}</small></div><span className={`status ${book.status === 'Disponível' ? 'available' : 'loaned'}`}>{book.status}</span><span className="row-more">•••</span></div>)}</div></section><section className="panel loans-panel"><div className="section-heading"><h2>Próximas devoluções</h2><button className="text-btn">Ver todas</button></div><div className="loan-item"><div className="loan-date"><strong>12</strong><small>JUN</small></div><div><strong>Dom Casmurro</strong><small>Lucas Andrade</small></div><span className="tag warning">Amanhã</span></div><div className="loan-item"><div className="loan-date"><strong>15</strong><small>JUN</small></div><div><strong>Clean Code</strong><small>Beatriz Souza</small></div><span className="tag">3 dias</span></div><div className="loan-item"><div className="loan-date"><strong>18</strong><small>JUN</small></div><div><strong>O Design do Dia a Dia</strong><small>Rafael Costa</small></div><span className="tag">6 dias</span></div></section></div>
+        </section>
+      </main>
+    </div>
+  )
+}
+
+function Metric({ value, label, accent, icon }: { value: string; label: string; accent: string; icon: string }) { return <div className={`metric ${accent}`}><div className="metric-icon">{icon}</div><div><strong>{value}</strong><span>{label}</span></div><small>↗</small></div> }
+
+export default App
