@@ -106,3 +106,22 @@ Os testes de página cobrem os fluxos principais, mas não todos os caminhos de 
 - Os novos testes cobrem consulta, cadastro, erro HTTP e falha de conexao com `fetch` simulado.
 - TypeScript e build Vite aprovados apos a integracao do cliente HTTP.
 - Nenhum teste frontend usa a API real.
+## 2026-11-10 — Validação da preparação MySQL
+
+- `dotnet restore backend/Biblioteca.sln --disable-parallel`: aprovado, incluindo Pomelo MySQL 8.0.2.
+- `dotnet build backend/Biblioteca.sln --no-restore -p:UseSharedCompilation=false`: aprovado, 0 erros e 0 avisos.
+- `dotnet test backend/Biblioteca.sln --no-build -p:UseSharedCompilation=false`: interrompido por erro interno do CLR no runner; não registrar como suíte aprovada.
+- Docker está instalado, mas o daemon não está acessível; não houve teste de conexão nem aplicação de migration MySQL.
+
+## 2026-11-10 — Atualização .NET 10/npm
+
+- SDK disponível: .NET 10.0.114.
+- Build/teste após a atualização de target e pacotes ainda pendentes; o restore deve ser executado com registry NuGet acessível.
+- npm não gerou o lockfile nesta sessão porque `npm install --package-lock-only --ignore-scripts` ficou sem resposta; não declarar validação frontend como aprovada.
+
+## 2026-11-10 — MySQL local
+
+- Container `biblioteca-mysql` MySQL 8.4.13: saudável.
+- Conexão com o usuário `biblioteca` e banco `biblioteca`: aprovada.
+- API .NET 10 iniciou com `Database__Provider=MySql` e criou as tabelas `Books`, `Copies`, `Readers` e `Loans` via `EnsureCreated`.
+- As migrations PostgreSQL não foram aplicadas ao MySQL; a incompatibilidade de tipos foi confirmada e permanece registrada para a geração de migrations MySQL separadas.

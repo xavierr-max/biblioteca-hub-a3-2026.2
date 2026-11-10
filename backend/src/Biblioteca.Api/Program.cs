@@ -12,6 +12,7 @@ var connection = builder.Configuration.GetConnectionString("Biblioteca") ?? "Dat
 builder.Services.AddDbContext<BibliotecaDbContext>(options =>
 {
     if (provider.Equals("Postgres", StringComparison.OrdinalIgnoreCase)) options.UseNpgsql(connection);
+    else if (provider.Equals("MySql", StringComparison.OrdinalIgnoreCase)) options.UseMySql(connection, ServerVersion.AutoDetect(connection));
     else options.UseSqlite(connection);
 });
 builder.Services.AddCors(options => options.AddPolicy("DevelopmentFrontend", policy =>
@@ -31,6 +32,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<BibliotecaDbContext>();
     if (provider.Equals("Postgres", StringComparison.OrdinalIgnoreCase)) await db.Database.MigrateAsync();
+    else if (provider.Equals("MySql", StringComparison.OrdinalIgnoreCase)) await db.Database.EnsureCreatedAsync();
     else await db.Database.EnsureCreatedAsync();
 }
 

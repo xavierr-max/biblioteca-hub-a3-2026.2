@@ -38,3 +38,11 @@ As páginas reais são renderizadas sob `LibraryProvider` e exercitadas com `use
 - Tornar a integracao API opt-in por `VITE_DATA_MODE`, preservando `localStorage` como modo padrao e evitando migracao automatica.
 - Integrar somente consulta/cadastro de livros nesta etapa; manter leitores e circulacao locais para evitar estado hibrido nao controlado.
 - Usar `fetch` tipado e sem dependencia HTTP adicional. O cliente nao faz fallback silencioso quando a API falha.
+
+## 2026-11-10 — MySQL como banco definitivo
+
+MySQL foi escolhido explicitamente como provider definitivo, usando Pomelo.EntityFrameworkCore.MySql 9.0.0. SQLite permanece disponível para testes isolados; as migrations PostgreSQL existentes não são removidas nem reescritas. Como as migrations atuais contêm tipos específicos de PostgreSQL, o modo MySQL usa `EnsureCreated` enquanto um conjunto separado de migrations MySQL é gerado e revisado.
+
+## 2026-11-10 — Atualização de plataforma
+
+O backend passa a direcionar todos os projetos para .NET 10. Como o provider MySQL estável disponível no NuGet é Pomelo 9.0.0, os pacotes EF Core/provider permanecem na linha 9 compatível entre si. O frontend adota npm como gerenciador oficial; o lockfile pnpm foi removido e o `package-lock.json` deve ser gerado em ambiente com registry npm acessível.

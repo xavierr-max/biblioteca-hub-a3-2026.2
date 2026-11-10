@@ -43,7 +43,7 @@ Sempre que uma regra de negócio for alterada, revisar os testes relacionados, a
 
 Sempre que uma suíte for executada, registrar os resultados relevantes, a data da validação completa e distinguir métricas atuais de históricas. Nunca declarar validações não executadas.
 
-Para o backend, SQLite pode ser usado sem Docker em desenvolvimento e testes; PostgreSQL deve permanecer configurado como banco definitivo.
+Para o backend, SQLite pode ser usado sem Docker em desenvolvimento e testes; MySQL é o banco definitivo. Migrations históricas PostgreSQL devem permanecer intactas.
 
 Toda implementação futura em C#/.NET deverá respeitar a estrutura em camadas, utilizar uma classe principal por arquivo, aplicar o padrão de formatação estabelecido no `.editorconfig` e evitar concentração de responsabilidades em arquivos genéricos.
 

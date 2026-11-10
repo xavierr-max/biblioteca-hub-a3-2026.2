@@ -57,3 +57,9 @@ Emprestimos e devolucoes basicos estao implementados e validados em SQLite. Prox
 ## Apos Fase 5.1
 
 Validar a tela real em modo API com a API e o Vite executando simultaneamente. Depois integrar atualizacao/arquivamento de livros e somente entao planejar a migracao coordenada de leitores e circulacao.
+## 2026-11-10
+
+- Disponibilizar um servidor MySQL local/container acessível e fornecer a conexão apenas por ambiente local (`Database__Provider` e `ConnectionStrings__Biblioteca`); nunca versionar senha.
+- Gerar e revisar migrations MySQL em diretório/assembly separado, preservando integralmente o histórico PostgreSQL existente, e aplicar em banco descartável antes do ambiente definitivo.
+- Reexecutar `dotnet test` fora do runner que apresentou erro interno do CLR e validar integração real contra MySQL.
+- Gerar migrations MySQL separadas a partir de um contexto/snapshot MySQL, substituir `EnsureCreated` por `MigrateAsync` nesse provider e validar o schema em banco descartável.

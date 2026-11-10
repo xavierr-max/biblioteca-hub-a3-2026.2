@@ -62,3 +62,17 @@ Separados arquivos e responsabilidades do domínio, aplicação, persistência e
 - Adicionada configuracao CORS de desenvolvimento para as origens Vite.
 - Integrados carregamento e cadastro de livros no modo API, mantendo modo local como padrao.
 - Adicionados testes Jest para sucesso, cadastro, erro HTTP e falha de conexao.
+## 2026-11-10 — Preparação do provider MySQL
+
+- Validado que `HEAD` coincide com `origin/main`; `git fetch` não pôde atualizar `FETCH_HEAD` por restrição de escrita e nenhum pull/reset/force foi executado.
+- Adicionado Pomelo EF Core MySQL 8.0.2, configuração `Database:Provider=MySql` e conexão por variáveis de ambiente.
+- Build backend passou sem erros. Docker daemon não está acessível nesta sessão; nenhuma migration foi aplicada a servidor real.
+
+- Container Docker `biblioteca-mysql` criado com MySQL 8.4, volume `biblioteca-mysql-data`, banco `biblioteca` e usuário de desenvolvimento `biblioteca`.
+- Conexão MySQL confirmada; as migrations PostgreSQL falharam no MySQL por usarem tipos PostgreSQL. O modo MySQL foi ajustado para criar o schema inicial via `EnsureCreated` sem modificar o histórico PostgreSQL.
+
+## 2026-11-10 — .NET 10 e npm
+
+- Projetos backend atualizados para `net10.0`, com Microsoft EF Core, SQLite, Npgsql e Pomelo MySQL 10.0.0.
+- Frontend passou a documentar npm; `pnpm-lock.yaml` foi removido.
+- `npm install --package-lock-only --ignore-scripts` não concluiu nesta sessão por indisponibilidade aparente do registry; `package-lock.json` ainda precisa ser gerado.

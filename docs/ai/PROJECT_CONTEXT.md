@@ -8,7 +8,7 @@ BibliotecaHub é uma aplicação frontend para administrar livros, exemplares f�
 
 - React 19, Vite 8 e TypeScript 5.7.
 - Jest 30 com ts-jest 29, ambiente jsdom e React Testing Library 16 com user-event.
-- pnpm é o gerenciador do frontend; o lockfile versionado é `frontend/pnpm-lock.yaml`.
+- npm é o gerenciador do frontend; o lockfile versionado é `frontend/package-lock.json`.
 
 ## Funcionalidades existentes
 
