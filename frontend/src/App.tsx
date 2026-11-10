@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './index.css'
 
-const books = [
+const fallbackBooks = [
   { title: 'Clean Code', author: 'Robert C. Martin', category: 'Tecnologia', status: 'Disponível', color: 'coral' },
   { title: 'Dom Casmurro', author: 'Machado de Assis', category: 'Literatura', status: 'Emprestado', color: 'cream' },
   { title: 'O Design do Dia a Dia', author: 'Don Norman', category: 'Design', status: 'Disponível', color: 'orange' },
@@ -10,6 +10,16 @@ const books = [
 function App() {
   const [active, setActive] = useState('Dashboard')
   const [search, setSearch] = useState('')
+  const [books, setBooks] = useState(fallbackBooks)
+  const [loadingBooks, setLoadingBooks] = useState(true)
+  const [apiOffline, setApiOffline] = useState(false)
+  useEffect(() => {
+    fetch(import.meta.env.VITE_API_URL ?? 'http://localhost:5180/api/books')
+      .then((response) => { if (!response.ok) throw new Error('API unavailable'); return response.json() })
+      .then((items: Array<{ title: string; isbn13: string }>) => setBooks(items.map((item, index) => ({ title: item.title, author: 'Catálogo conectado', category: `ISBN ${item.isbn13}`, status: index % 2 ? 'Emprestado' : 'Disponível', color: ['coral', 'cream', 'orange'][index % 3] }))))
+      .catch(() => setApiOffline(true))
+      .finally(() => setLoadingBooks(false))
+  }, [])
   const filtered = books.filter((book) => `${book.title} ${book.author}`.toLowerCase().includes(search.toLowerCase()))
 
   return (
@@ -43,7 +53,7 @@ function App() {
           <div className="section-heading"><h2>Seu espaço hoje</h2><button className="text-btn">Ver relatórios ↗</button></div>
           <div className="metric-grid"><Metric value="248" label="livros no acervo" accent="orange" icon="▣" /><Metric value="86" label="leitores ativos" accent="cream" icon="♙" /><Metric value="12" label="empréstimos ativos" accent="coral" icon="↗" /><Metric value="03" label="devoluções atrasadas" accent="dark" icon="◷" /></div>
 
-          <div className="lower-grid"><section className="panel"><div className="section-heading"><h2>Livros recentes</h2><button className="text-btn">Ver catálogo ↗</button></div><div className="book-list">{filtered.map((book) => <div className="book-row" key={book.title}><div className={`book-cover ${book.color}`}>{book.title.split(' ').map((word) => <span key={word}>{word}</span>)}</div><div className="book-info"><strong>{book.title}</strong><small>{book.author} · {book.category}</small></div><span className={`status ${book.status === 'Disponível' ? 'available' : 'loaned'}`}>{book.status}</span><span className="row-more">•••</span></div>)}</div></section><section className="panel loans-panel"><div className="section-heading"><h2>Próximas devoluções</h2><button className="text-btn">Ver todas</button></div><div className="loan-item"><div className="loan-date"><strong>12</strong><small>JUN</small></div><div><strong>Dom Casmurro</strong><small>Lucas Andrade</small></div><span className="tag warning">Amanhã</span></div><div className="loan-item"><div className="loan-date"><strong>15</strong><small>JUN</small></div><div><strong>Clean Code</strong><small>Beatriz Souza</small></div><span className="tag">3 dias</span></div><div className="loan-item"><div className="loan-date"><strong>18</strong><small>JUN</small></div><div><strong>O Design do Dia a Dia</strong><small>Rafael Costa</small></div><span className="tag">6 dias</span></div></section></div>
+          <div className="lower-grid"><section className="panel"><div className="section-heading"><h2>Livros recentes</h2><button className="text-btn">Ver catálogo ↗</button></div>{loadingBooks && <p className="api-message">Carregando catálogo...</p>}{apiOffline && <p className="api-message">API indisponível · mostrando dados de demonstração</p>}<div className="book-list">{filtered.map((book) => <div className="book-row" key={book.title}><div className={`book-cover ${book.color}`}>{book.title.split(' ').map((word) => <span key={word}>{word}</span>)}</div><div className="book-info"><strong>{book.title}</strong><small>{book.author} · {book.category}</small></div><span className={`status ${book.status === 'Disponível' ? 'available' : 'loaned'}`}>{book.status}</span><span className="row-more">•••</span></div>)}</div></section><section className="panel loans-panel"><div className="section-heading"><h2>Próximas devoluções</h2><button className="text-btn">Ver todas</button></div><div className="loan-item"><div className="loan-date"><strong>12</strong><small>JUN</small></div><div><strong>Dom Casmurro</strong><small>Lucas Andrade</small></div><span className="tag warning">Amanhã</span></div><div className="loan-item"><div className="loan-date"><strong>15</strong><small>JUN</small></div><div><strong>Clean Code</strong><small>Beatriz Souza</small></div><span className="tag">3 dias</span></div><div className="loan-item"><div className="loan-date"><strong>18</strong><small>JUN</small></div><div><strong>O Design do Dia a Dia</strong><small>Rafael Costa</small></div><span className="tag">6 dias</span></div></section></div>
         </section>
       </main>
     </div>
