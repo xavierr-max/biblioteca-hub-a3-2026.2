@@ -31,6 +31,23 @@ app.MapPost("/api/books", async (CreateBookRequest request, LibraryDbContext db,
     await db.SaveChangesAsync(ct);
     return Results.Created($"/api/books/{book.BookId}", book);
 });
+app.MapPut("/api/books/{id:long}", async (long id, UpdateBookRequest request, LibraryDbContext db, CancellationToken ct) =>
+{
+    var book = await db.Books.SingleOrDefaultAsync(x => x.BookId == id, ct);
+    if (book is null) return Results.NotFound();
+    if (string.IsNullOrWhiteSpace(request.Title) || request.Isbn13 is not { Length: 13 } || !request.Isbn13.All(char.IsDigit)) return Results.BadRequest(new { error = "Title and a valid ISBN-13 are required." });
+    if (!await db.Categories.AnyAsync(x => x.CategoryId == request.CategoryId, ct)) return Results.BadRequest(new { error = "Category not found." });
+    if (await db.Books.AnyAsync(x => x.BookId != id && x.Isbn13 == request.Isbn13, ct)) return Results.Conflict(new { error = "ISBN already exists." });
+    book.Title = request.Title.Trim(); book.Isbn13 = request.Isbn13; book.CategoryId = request.CategoryId; book.IsArchived = request.IsArchived;
+    await db.SaveChangesAsync(ct); return Results.Ok(book);
+});
+app.MapDelete("/api/books/{id:long}", async (long id, LibraryDbContext db, CancellationToken ct) =>
+{
+    var book = await db.Books.SingleOrDefaultAsync(x => x.BookId == id, ct);
+    if (book is null) return Results.NotFound();
+    if (await db.Copies.AnyAsync(x => x.BookId == id && x.Status == CopyStatus.Loaned, ct)) return Results.Conflict(new { error = "Book has loaned copies." });
+    book.IsArchived = true; await db.SaveChangesAsync(ct); return Results.NoContent();
+});
 app.MapGet("/api/readers",
     async (LibraryDbContext db, CancellationToken ct) =>
         Results.Ok(await db.Readers.AsNoTracking().OrderBy(x => x.FullName).ToListAsync(ct)));
@@ -45,6 +62,22 @@ app.MapPost("/api/readers", async (CreateReaderRequest request, LibraryDbContext
     db.Readers.Add(reader);
     await db.SaveChangesAsync(ct);
     return Results.Created($"/api/readers/{reader.ReaderId}", reader);
+});
+app.MapPut("/api/readers/{id:long}", async (long id, UpdateReaderRequest request, LibraryDbContext db, CancellationToken ct) =>
+{
+    var reader = await db.Readers.SingleOrDefaultAsync(x => x.ReaderId == id, ct);
+    if (reader is null) return Results.NotFound();
+    if (string.IsNullOrWhiteSpace(request.FullName) || string.IsNullOrWhiteSpace(request.RegistrationNumber)) return Results.BadRequest(new { error = "Name and registration number are required." });
+    if (await db.Readers.AnyAsync(x => x.ReaderId != id && x.RegistrationNumber == request.RegistrationNumber, ct)) return Results.Conflict(new { error = "Registration number already exists." });
+    reader.FullName = request.FullName.Trim(); reader.RegistrationNumber = request.RegistrationNumber.Trim(); reader.IsSuspended = request.IsSuspended;
+    await db.SaveChangesAsync(ct); return Results.Ok(reader);
+});
+app.MapDelete("/api/readers/{id:long}", async (long id, LibraryDbContext db, CancellationToken ct) =>
+{
+    var reader = await db.Readers.SingleOrDefaultAsync(x => x.ReaderId == id, ct);
+    if (reader is null) return Results.NotFound();
+    if (await db.Loans.AnyAsync(x => x.ReaderId == id && x.ReturnedAt == null, ct)) return Results.Conflict(new { error = "Reader has active loans." });
+    db.Readers.Remove(reader); await db.SaveChangesAsync(ct); return Results.NoContent();
 });
 app.MapGet("/api/copies",
     async (LibraryDbContext db, CancellationToken ct) =>
@@ -61,6 +94,23 @@ app.MapPost("/api/copies", async (CreateCopyRequest request, LibraryDbContext db
     db.Copies.Add(copy);
     await db.SaveChangesAsync(ct);
     return Results.Created($"/api/copies/{copy.CopyId}", copy);
+});
+app.MapPut("/api/copies/{id:long}", async (long id, UpdateCopyRequest request, LibraryDbContext db, CancellationToken ct) =>
+{
+    var copy = await db.Copies.SingleOrDefaultAsync(x => x.CopyId == id, ct);
+    if (copy is null) return Results.NotFound();
+    if (string.IsNullOrWhiteSpace(request.InventoryCode)) return Results.BadRequest(new { error = "Inventory code is required." });
+    if (!await db.Books.AnyAsync(x => x.BookId == request.BookId && !x.IsArchived, ct)) return Results.BadRequest(new { error = "Book not found or archived." });
+    if (await db.Copies.AnyAsync(x => x.CopyId != id && x.InventoryCode == request.InventoryCode, ct)) return Results.Conflict(new { error = "Inventory code already exists." });
+    copy.BookId = request.BookId; copy.InventoryCode = request.InventoryCode.Trim(); copy.Status = request.Status;
+    await db.SaveChangesAsync(ct); return Results.Ok(copy);
+});
+app.MapDelete("/api/copies/{id:long}", async (long id, LibraryDbContext db, CancellationToken ct) =>
+{
+    var copy = await db.Copies.SingleOrDefaultAsync(x => x.CopyId == id, ct);
+    if (copy is null) return Results.NotFound();
+    if (copy.Status == CopyStatus.Loaned) return Results.Conflict(new { error = "Copy is currently loaned." });
+    db.Copies.Remove(copy); await db.SaveChangesAsync(ct); return Results.NoContent();
 });
 app.MapGet("/api/loans",
     async (LibraryDbContext db, CancellationToken ct) =>
@@ -83,6 +133,21 @@ app.MapPost("/api/loans", async (CreateLoanRequest request, LibraryDbContext db,
     await transaction.CommitAsync(ct);
     return Results.Created($"/api/loans/{loan.LoanId}", loan);
 });
+app.MapPut("/api/loans/{id:long}", async (long id, UpdateLoanRequest request, LibraryDbContext db, CancellationToken ct) =>
+{
+    var loan = await db.Loans.SingleOrDefaultAsync(x => x.LoanId == id, ct);
+    if (loan is null) return Results.NotFound();
+    if (!await db.Readers.AnyAsync(x => x.ReaderId == request.ReaderId, ct) || !await db.Copies.AnyAsync(x => x.CopyId == request.CopyId, ct)) return Results.BadRequest(new { error = "Reader or copy not found." });
+    loan.ReaderId = request.ReaderId; loan.CopyId = request.CopyId; loan.DueAt = request.DueAt ?? loan.DueAt; loan.ReturnedAt = request.ReturnedAt;
+    await db.SaveChangesAsync(ct); return Results.Ok(loan);
+});
+app.MapDelete("/api/loans/{id:long}", async (long id, LibraryDbContext db, CancellationToken ct) =>
+{
+    var loan = await db.Loans.SingleOrDefaultAsync(x => x.LoanId == id, ct);
+    if (loan is null) return Results.NotFound();
+    if (loan.ReturnedAt is null) { var copy = await db.Copies.SingleAsync(x => x.CopyId == loan.CopyId, ct); copy.Status = CopyStatus.Available; }
+    db.Loans.Remove(loan); await db.SaveChangesAsync(ct); return Results.NoContent();
+});
 app.MapPost("/api/loans/{id:long}/return", async (long id, LibraryDbContext db, CancellationToken ct) =>
 {
     await using var transaction = await db.Database.BeginTransactionAsync(ct);
@@ -99,9 +164,13 @@ app.MapPost("/api/loans/{id:long}/return", async (long id, LibraryDbContext db, 
 app.Run();
 
 public sealed record CreateBookRequest(string Title, string Isbn13, long CategoryId);
+public sealed record UpdateBookRequest(string Title, string Isbn13, long CategoryId, bool IsArchived);
 
 public sealed record CreateReaderRequest(string FullName, string RegistrationNumber);
+public sealed record UpdateReaderRequest(string FullName, string RegistrationNumber, bool IsSuspended);
 
 public sealed record CreateCopyRequest(long BookId, string InventoryCode);
+public sealed record UpdateCopyRequest(long BookId, string InventoryCode, CopyStatus Status);
 
 public sealed record CreateLoanRequest(long ReaderId, long CopyId);
+public sealed record UpdateLoanRequest(long ReaderId, long CopyId, DateTime? DueAt, DateTime? ReturnedAt);

@@ -8,17 +8,26 @@ export type Loan = { loanId: number; copyId: number; readerId: number; loanedAt:
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, { headers: { 'Content-Type': 'application/json' }, ...options })
   if (!response.ok) throw new Error(await response.text() || `Request failed: ${response.status}`)
+  if (response.status === 204) return undefined as T
   return response.json() as Promise<T>
 }
 
 export const libraryApi = {
   books: () => request<Book[]>('/books'),
   createBook: (body: Pick<Book, 'title' | 'isbn13' | 'categoryId'>) => request<Book>('/books', { method: 'POST', body: JSON.stringify(body) }),
+  updateBook: (id: number, body: Pick<Book, 'title' | 'isbn13' | 'categoryId' | 'isArchived'>) => request<Book>(`/books/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  deleteBook: (id: number) => request<void>(`/books/${id}`, { method: 'DELETE' }),
   readers: () => request<Reader[]>('/readers'),
   createReader: (body: Pick<Reader, 'fullName' | 'registrationNumber'>) => request<Reader>('/readers', { method: 'POST', body: JSON.stringify(body) }),
+  updateReader: (id: number, body: Pick<Reader, 'fullName' | 'registrationNumber' | 'isSuspended'>) => request<Reader>(`/readers/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  deleteReader: (id: number) => request<void>(`/readers/${id}`, { method: 'DELETE' }),
   copies: () => request<Copy[]>('/copies'),
   createCopy: (body: Pick<Copy, 'bookId' | 'inventoryCode'>) => request<Copy>('/copies', { method: 'POST', body: JSON.stringify(body) }),
+  updateCopy: (id: number, body: Pick<Copy, 'bookId' | 'inventoryCode' | 'status'>) => request<Copy>(`/copies/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  deleteCopy: (id: number) => request<void>(`/copies/${id}`, { method: 'DELETE' }),
   loans: () => request<Loan[]>('/loans'),
   createLoan: (body: Pick<Loan, 'readerId' | 'copyId'>) => request<Loan>('/loans', { method: 'POST', body: JSON.stringify(body) }),
+  updateLoan: (id: number, body: Pick<Loan, 'readerId' | 'copyId' | 'dueAt' | 'returnedAt'>) => request<Loan>(`/loans/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  deleteLoan: (id: number) => request<void>(`/loans/${id}`, { method: 'DELETE' }),
   returnLoan: (loanId: number) => request<Loan>(`/loans/${loanId}/return`, { method: 'POST' }),
 }

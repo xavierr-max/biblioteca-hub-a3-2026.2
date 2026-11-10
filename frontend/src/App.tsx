@@ -55,6 +55,25 @@ function App() {
     try { await libraryApi.returnLoan(loanId); await reloadData(); setReturnMessage('Devolução registrada com sucesso.') }
     catch { setReturnMessage('Não foi possível registrar a devolução. Confirme o ID do empréstimo.') }
   }
+  async function deleteRecord(activeSection: string, id: number) {
+    if (!window.confirm('Confirma a exclusão deste registro?')) return
+    try {
+      if (activeSection === 'Livros') await libraryApi.deleteBook(id)
+      if (activeSection === 'Leitores') await libraryApi.deleteReader(id)
+      if (activeSection === 'Exemplares') await libraryApi.deleteCopy(id)
+      if (activeSection === 'Empréstimos') await libraryApi.deleteLoan(id)
+      await reloadData(); setFormMessage('Registro removido.')
+    } catch { setFormMessage('Não foi possível remover. Verifique vínculos e empréstimos ativos.') }
+  }
+  async function editRecord(activeSection: string, id: number) {
+    try {
+      if (activeSection === 'Livros') { const item = books.find((x) => x.bookId === id); if (item) await libraryApi.updateBook(id, { title: window.prompt('Título', item.title) ?? item.title, isbn13: window.prompt('ISBN-13', item.isbn13) ?? item.isbn13, categoryId: item.categoryId, isArchived: item.isArchived }) }
+      if (activeSection === 'Leitores') { const item = readers.find((x) => x.readerId === id); if (item) await libraryApi.updateReader(id, { fullName: window.prompt('Nome completo', item.fullName) ?? item.fullName, registrationNumber: item.registrationNumber, isSuspended: item.isSuspended }) }
+      if (activeSection === 'Exemplares') { const item = copies.find((x) => x.copyId === id); if (item) await libraryApi.updateCopy(id, { bookId: item.bookId, inventoryCode: window.prompt('Código de inventário', item.inventoryCode) ?? item.inventoryCode, status: item.status }) }
+      if (activeSection === 'Empréstimos') { const item = loans.find((x) => x.loanId === id); if (item) await libraryApi.updateLoan(id, { readerId: item.readerId, copyId: item.copyId, dueAt: item.dueAt, returnedAt: item.returnedAt }) }
+      await reloadData(); setFormMessage('Registro atualizado.')
+    } catch { setFormMessage('Não foi possível atualizar o registro.') }
+  }
 
   return (
     <div className="app-shell">
@@ -62,7 +81,7 @@ function App() {
         <div className="brand"><span className="brand-mark">b</span> biblioteca</div>
         <div className="workspace-label">GESTÃO</div>
         <nav>
-          {['Dashboard', 'Livros', 'Leitores', 'Exemplares', 'Empréstimos', 'Relatórios'].map((item, index) => (
+          {['Dashboard', 'Livros', 'Leitores', 'Exemplares', 'Empréstimos'].map((item, index) => (
             <button className={`nav-item ${active === item ? 'active' : ''}`} onClick={() => navigate(item)} key={item}>
               <span className="nav-icon">{['✦', '▣', '♙', '▤', '↗', '◒'][index]}</span>{item}
             </button>
@@ -81,11 +100,11 @@ function App() {
         <section className={`content-wrap ${active === 'Dashboard' ? 'dashboard-view' : 'section-view'}`}>
           <div className="eyebrow">{active === 'Dashboard' ? 'VISÃO GERAL' : 'CATÁLOGO DA BIBLIOTECA'}</div>
           <div className="heading-row"><div><h1>{active === 'Dashboard' ? 'Olá, Marina.' : active}</h1><p>{active === 'Dashboard' ? 'Aqui está o que está acontecendo na sua biblioteca hoje.' : 'Acompanhe e organize seu acervo com simplicidade.'}</p></div><button className="primary-btn" onClick={() => { setFormMessage(''); active === 'Leitores' ? setShowReaderForm(true) : active === 'Exemplares' ? setShowCopyForm(true) : active === 'Empréstimos' ? setShowLoanForm(true) : setShowBookForm(true) }}>+ {active === 'Leitores' ? 'Novo leitor' : active === 'Exemplares' ? 'Novo exemplar' : active === 'Empréstimos' ? 'Novo empréstimo' : 'Novo livro'}</button></div>
-          {active !== 'Dashboard' && <DataSection active={active} books={books} readers={readers} copies={copies} loans={loans} />}
+          {active !== 'Dashboard' && <DataSection active={active} books={books} readers={readers} copies={copies} loans={loans} onDelete={deleteRecord} onEdit={editRecord} />}
 
           <div className="hero-grid"><div className="hero-card"><div><span className="hero-kicker">RESUMO DO ACERVO</span><h2>Dados vivos,<br /><em>decisões melhores.</em></h2><p>Visão atualizada a partir dos registros do banco de dados.</p><button className="light-btn">Dados do backend ↗</button></div><div className="hero-art"><div className="book-shape one">{books.length}</div><div className="book-shape two">{copies.length}</div><div className="book-shape three">{readers.length}</div></div></div><div className="stats-card"><div className="card-label">EMPRÉSTIMOS ATIVOS <span>AO VIVO</span></div><div className="big-number">{activeLoans.length}</div><p>{overdueLoans} em atraso · {availableCopies} exemplares disponíveis</p><div className="live-meter"><span style={{ width: `${copies.length ? Math.min(100, (availableCopies / copies.length) * 100) : 0}%` }} /></div><div className="bar-labels"><span>Disponibilidade do acervo</span><span>{copies.length ? Math.round((availableCopies / copies.length) * 100) : 0}%</span></div></div></div>
 
-          <div className="section-heading"><h2>Seu espaço hoje</h2><button className="text-btn">Ver relatórios ↗</button></div>
+          <div className="section-heading"><h2>Seu espaço hoje</h2><button className="text-btn" onClick={() => void reloadData()}>Atualizar dados ↻</button></div>
           <div className="metric-grid"><Metric value={String(books.length)} label="livros no acervo" accent="orange" icon="▣" /><Metric value={String(readers.filter((reader) => !reader.isSuspended).length)} label="leitores ativos" accent="cream" icon="♙" /><Metric value={String(activeLoans.length)} label="empréstimos ativos" accent="coral" icon="↗" /><Metric value={String(overdueLoans)} label="devoluções atrasadas" accent="dark" icon="◷" /></div>
 
           {active === 'Dashboard' && <div className="lower-grid"><section className="panel"><div className="section-heading"><h2>Livros recentes</h2></div><div className="book-list">{filtered.map((book) => <div className="book-row" key={book.bookId}><div className="book-cover coral">{book.title}</div><div className="book-info"><strong>{book.title}</strong><small>ISBN {book.isbn13}</small></div><span className="tag">Categoria #{book.categoryId}</span></div>)}</div></section><section className="panel loans-panel"><div className="section-heading"><h2>Empréstimos recentes</h2></div>{loans.slice(0, 4).map((loan) => <div className="loan-item" key={loan.loanId}><div><strong>Empréstimo #{loan.loanId}</strong><small>Leitor #{loan.readerId} · Exemplar #{loan.copyId}</small></div>{loan.returnedAt ? <span className="tag">Devolvido</span> : <button className="text-btn" onClick={() => registerReturn(loan.loanId)}>Devolver</button>}</div>)}{returnMessage && <p className="api-message">{returnMessage}</p>}</section></div>}
@@ -99,9 +118,9 @@ function App() {
   )
 }
 
-function DataSection({ active, books, readers, copies, loans }: { active: string; books: Book[]; readers: Reader[]; copies: Copy[]; loans: Loan[] }) {
-  const rows = active === 'Livros' ? books.map((x) => [x.title, `ISBN ${x.isbn13}`, `Categoria #${x.categoryId}`]) : active === 'Leitores' ? readers.map((x) => [x.fullName, x.registrationNumber, x.isSuspended ? 'Suspenso' : 'Ativo']) : active === 'Exemplares' ? copies.map((x) => [x.inventoryCode, `Livro #${x.bookId}`, x.status]) : loans.map((x) => [`Empréstimo #${x.loanId}`, `Leitor #${x.readerId} · Exemplar #${x.copyId}`, x.returnedAt ? 'Devolvido' : 'Ativo'])
-  return <section className="panel section-panel"><div className="section-heading"><h2>{active}</h2><span className="tag">{rows.length} registros</span></div><div className="data-table">{rows.map((row, i) => <div className="data-row" key={`${row[0]}-${i}`}><strong>{row[0]}</strong><span>{row[1]}</span><span className="tag">{row[2]}</span></div>)}</div>{rows.length === 0 && <div className="empty-state"><strong>Nenhum registro no banco</strong><small>Cadastre o primeiro registro usando o botão acima.</small></div>}</section>
+function DataSection({ active, books, readers, copies, loans, onDelete, onEdit }: { active: string; books: Book[]; readers: Reader[]; copies: Copy[]; loans: Loan[]; onDelete: (section: string, id: number) => void; onEdit: (section: string, id: number) => void }) {
+  const rows = active === 'Livros' ? books.map((x) => ({ id: x.bookId, cells: [x.title, `ISBN ${x.isbn13}`, `Categoria #${x.categoryId}`] })) : active === 'Leitores' ? readers.map((x) => ({ id: x.readerId, cells: [x.fullName, x.registrationNumber, x.isSuspended ? 'Suspenso' : 'Ativo'] })) : active === 'Exemplares' ? copies.map((x) => ({ id: x.copyId, cells: [x.inventoryCode, `Livro #${x.bookId}`, x.status] })) : loans.map((x) => ({ id: x.loanId, cells: [`Empréstimo #${x.loanId}`, `Leitor #${x.readerId} · Exemplar #${x.copyId}`, x.returnedAt ? 'Devolvido' : 'Ativo'] }))
+  return <section className="panel section-panel"><div className="section-heading"><h2>{active}</h2><span className="tag">{rows.length} registros · CRUD REST</span></div><div className="data-table">{rows.map((row) => <div className="data-row" key={`${row.cells[0]}-${row.id}`}><strong>{row.cells[0]}</strong><span>{row.cells[1]}</span><span className="tag">{row.cells[2]}</span><button className="text-btn" onClick={() => onEdit(active, row.id)}>Editar</button><button className="text-btn" onClick={() => onDelete(active, row.id)}>Excluir</button></div>)}</div>{rows.length === 0 && <div className="empty-state"><strong>Nenhum registro no banco</strong><small>Cadastre o primeiro registro usando o botão acima.</small></div>}</section>
 }
 function Metric({ value, label, accent, icon }: { value: string; label: string; accent: string; icon: string }) { return <div className={`metric ${accent}`}><div className="metric-icon">{icon}</div><div><strong>{value}</strong><span>{label}</span></div><small>↗</small></div> }
 
