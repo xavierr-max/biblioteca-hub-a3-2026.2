@@ -1,20 +1,15 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { libraryApi } from './services/api'
+import { libraryApi, type Book, type Copy, type Loan, type Reader } from './services/api'
 import './index.css'
 import './modal.css'
-
-const fallbackBooks = [
-  { title: 'Clean Code', author: 'Robert C. Martin', category: 'Tecnologia', status: 'Disponível', color: 'coral' },
-  { title: 'Dom Casmurro', author: 'Machado de Assis', category: 'Literatura', status: 'Emprestado', color: 'cream' },
-  { title: 'O Design do Dia a Dia', author: 'Don Norman', category: 'Design', status: 'Disponível', color: 'orange' },
-]
 
 function App() {
   const [active, setActive] = useState('Dashboard')
   const [search, setSearch] = useState('')
-  const [books, setBooks] = useState(fallbackBooks)
-  const [loadingBooks, setLoadingBooks] = useState(true)
-  const [apiOffline, setApiOffline] = useState(false)
+  const [books, setBooks] = useState<Book[]>([])
+  const [readers, setReaders] = useState<Reader[]>([])
+  const [copies, setCopies] = useState<Copy[]>([])
+  const [loans, setLoans] = useState<Loan[]>([])
   const [showBookForm, setShowBookForm] = useState(false)
   const [bookForm, setBookForm] = useState({ title: '', isbn13: '', categoryId: '1' })
   const [showReaderForm, setShowReaderForm] = useState(false)
@@ -26,13 +21,11 @@ function App() {
   const [returnMessage, setReturnMessage] = useState('')
   const [formMessage, setFormMessage] = useState('')
   useEffect(() => {
-    fetch(import.meta.env.VITE_API_URL ?? 'http://localhost:5180/api/books')
-      .then((response) => { if (!response.ok) throw new Error('API unavailable'); return response.json() })
-      .then((items: Array<{ title: string; isbn13: string }>) => setBooks(items.map((item, index) => ({ title: item.title, author: 'Catálogo conectado', category: `ISBN ${item.isbn13}`, status: index % 2 ? 'Emprestado' : 'Disponível', color: ['coral', 'cream', 'orange'][index % 3] }))))
-      .catch(() => setApiOffline(true))
-      .finally(() => setLoadingBooks(false))
+    Promise.all([libraryApi.books(), libraryApi.readers(), libraryApi.copies(), libraryApi.loans()])
+      .then(([bookData, readerData, copyData, loanData]) => { setBooks(bookData); setReaders(readerData); setCopies(copyData); setLoans(loanData) })
+      .catch(() => undefined)
   }, [])
-  const filtered = books.filter((book) => `${book.title} ${book.author}`.toLowerCase().includes(search.toLowerCase()))
+  const filtered = books.filter((book) => `${book.title} ${book.isbn13}`.toLowerCase().includes(search.toLowerCase()))
   async function submitBook(event: FormEvent) {
     event.preventDefault(); setFormMessage('Salvando...')
     try { await libraryApi.createBook({ ...bookForm, categoryId: Number(bookForm.categoryId) }); setFormMessage('Livro cadastrado.'); setShowBookForm(false); setBookForm({ title: '', isbn13: '', categoryId: '1' }) }
@@ -84,14 +77,14 @@ function App() {
         <section className={`content-wrap ${active === 'Dashboard' ? 'dashboard-view' : 'section-view'}`}>
           <div className="eyebrow">{active === 'Dashboard' ? 'VISÃO GERAL' : 'CATÁLOGO DA BIBLIOTECA'}</div>
           <div className="heading-row"><div><h1>{active === 'Dashboard' ? 'Olá, Marina.' : active}</h1><p>{active === 'Dashboard' ? 'Aqui está o que está acontecendo na sua biblioteca hoje.' : 'Acompanhe e organize seu acervo com simplicidade.'}</p></div><button className="primary-btn" onClick={() => { setFormMessage(''); active === 'Leitores' ? setShowReaderForm(true) : active === 'Exemplares' ? setShowCopyForm(true) : active === 'Empréstimos' ? setShowLoanForm(true) : setShowBookForm(true) }}>+ {active === 'Leitores' ? 'Novo leitor' : active === 'Exemplares' ? 'Novo exemplar' : active === 'Empréstimos' ? 'Novo empréstimo' : 'Novo livro'}</button></div>
-          {active !== 'Dashboard' && <section className="panel section-panel"><div className="section-heading"><h2>{active}</h2><span className="tag">API conectada</span></div><p className="section-description">Esta área agora possui um espaço próprio para os registros de {active.toLowerCase()}. Use o botão acima para adicionar um novo item e acompanhe os dados reais conforme a API for carregada.</p><div className="empty-state"><span className="empty-icon">{active === 'Relatórios' ? '◒' : active === 'Empréstimos' ? '↗' : active === 'Exemplares' ? '▤' : active === 'Leitores' ? '♙' : '▣'}</span><strong>{active === 'Relatórios' ? 'Relatórios em preparação' : `Nenhum registro carregado em ${active.toLowerCase()}`}</strong><small>Os dados serão exibidos aqui quando o endpoint correspondente for conectado.</small></div></section>}
+          {active !== 'Dashboard' && <DataSection active={active} books={books} readers={readers} copies={copies} loans={loans} />}
 
           <div className="hero-grid"><div className="hero-card"><div><span className="hero-kicker">RESUMO DO DIA</span><h2>Seu acervo está<br /><em>ganhando vida.</em></h2><p>12 novos empréstimos foram registrados esta semana.</p><button className="light-btn">Ver movimentações ↗</button></div><div className="hero-art"><div className="book-shape one">A</div><div className="book-shape two">B</div><div className="book-shape three">C</div></div></div><div className="stats-card"><div className="card-label">ATIVIDADE <span>•••</span></div><div className="big-number">24 <small>+18%</small></div><p>empréstimos este mês</p><div className="bars">{[35, 54, 42, 75, 58, 88, 68, 96, 74, 100].map((height, i) => <span key={i} style={{ height: `${height}%` }} className={i === 9 ? 'highlight' : ''} />)}</div><div className="bar-labels"><span>01</span><span>10</span><span>20</span><span>30</span></div></div></div>
 
           <div className="section-heading"><h2>Seu espaço hoje</h2><button className="text-btn">Ver relatórios ↗</button></div>
           <div className="metric-grid"><Metric value="248" label="livros no acervo" accent="orange" icon="▣" /><Metric value="86" label="leitores ativos" accent="cream" icon="♙" /><Metric value="12" label="empréstimos ativos" accent="coral" icon="↗" /><Metric value="03" label="devoluções atrasadas" accent="dark" icon="◷" /></div>
 
-          <div className="lower-grid"><section className="panel"><div className="section-heading"><h2>Livros recentes</h2><button className="text-btn">Ver catálogo ↗</button></div>{loadingBooks && <p className="api-message">Carregando catálogo...</p>}{apiOffline && <p className="api-message">API indisponível · mostrando dados de demonstração</p>}<div className="book-list">{filtered.map((book) => <div className="book-row" key={book.title}><div className={`book-cover ${book.color}`}>{book.title.split(' ').map((word) => <span key={word}>{word}</span>)}</div><div className="book-info"><strong>{book.title}</strong><small>{book.author} · {book.category}</small></div><span className={`status ${book.status === 'Disponível' ? 'available' : 'loaned'}`}>{book.status}</span><span className="row-more">•••</span></div>)}</div></section><section className="panel loans-panel"><div className="section-heading"><h2>Próximas devoluções</h2><button className="text-btn">Ver todas</button></div>{returnMessage && <p className="api-message">{returnMessage}</p>}<div className="loan-item"><div className="loan-date"><strong>12</strong><small>JUN</small></div><div><strong>Dom Casmurro</strong><small>Lucas Andrade</small></div><button className="text-btn" onClick={() => registerReturn(1)}>Devolver</button><span className="tag warning">Amanhã</span></div><div className="loan-item"><div className="loan-date"><strong>15</strong><small>JUN</small></div><div><strong>Clean Code</strong><small>Beatriz Souza</small></div><span className="tag">3 dias</span></div><div className="loan-item"><div className="loan-date"><strong>18</strong><small>JUN</small></div><div><strong>O Design do Dia a Dia</strong><small>Rafael Costa</small></div><span className="tag">6 dias</span></div></section></div>
+          {active === 'Dashboard' && <div className="lower-grid"><section className="panel"><div className="section-heading"><h2>Livros recentes</h2></div><div className="book-list">{filtered.map((book) => <div className="book-row" key={book.bookId}><div className="book-cover coral">{book.title}</div><div className="book-info"><strong>{book.title}</strong><small>ISBN {book.isbn13}</small></div><span className="tag">Categoria #{book.categoryId}</span></div>)}</div></section><section className="panel loans-panel"><div className="section-heading"><h2>Empréstimos recentes</h2></div>{loans.slice(0, 4).map((loan) => <div className="loan-item" key={loan.loanId}><div><strong>Empréstimo #{loan.loanId}</strong><small>Leitor #{loan.readerId} · Exemplar #{loan.copyId}</small></div>{loan.returnedAt ? <span className="tag">Devolvido</span> : <button className="text-btn" onClick={() => registerReturn(loan.loanId)}>Devolver</button>}</div>)}{returnMessage && <p className="api-message">{returnMessage}</p>}</section></div>}
           {showBookForm && <div className="modal-backdrop"><form className="book-form" onSubmit={submitBook}><div className="section-heading"><h2>Novo livro</h2><button type="button" className="text-btn" onClick={() => setShowBookForm(false)}>Fechar ×</button></div><label>Título<input required value={bookForm.title} onChange={(e) => setBookForm({ ...bookForm, title: e.target.value })} /></label><label>ISBN-13<input required minLength={13} maxLength={13} value={bookForm.isbn13} onChange={(e) => setBookForm({ ...bookForm, isbn13: e.target.value })} /></label><label>ID da categoria<input required type="number" min="1" value={bookForm.categoryId} onChange={(e) => setBookForm({ ...bookForm, categoryId: e.target.value })} /></label>{formMessage && <p className="api-message">{formMessage}</p>}<button className="primary-btn" type="submit">Salvar livro</button></form></div>}
           {showReaderForm && <div className="modal-backdrop"><form className="book-form" onSubmit={submitReader}><div className="section-heading"><h2>Novo leitor</h2><button type="button" className="text-btn" onClick={() => setShowReaderForm(false)}>Fechar ×</button></div><label>Nome completo<input required value={readerForm.fullName} onChange={(e) => setReaderForm({ ...readerForm, fullName: e.target.value })} /></label><label>Matrícula<input required value={readerForm.registrationNumber} onChange={(e) => setReaderForm({ ...readerForm, registrationNumber: e.target.value })} /></label>{formMessage && <p className="api-message">{formMessage}</p>}<button className="primary-btn" type="submit">Salvar leitor</button></form></div>}
           {showCopyForm && <div className="modal-backdrop"><form className="book-form" onSubmit={submitCopy}><div className="section-heading"><h2>Novo exemplar</h2><button type="button" className="text-btn" onClick={() => setShowCopyForm(false)}>Fechar ×</button></div><label>ID do livro<input required type="number" min="1" value={copyForm.bookId} onChange={(e) => setCopyForm({ ...copyForm, bookId: e.target.value })} /></label><label>Código de inventário<input required value={copyForm.inventoryCode} onChange={(e) => setCopyForm({ ...copyForm, inventoryCode: e.target.value })} /></label>{formMessage && <p className="api-message">{formMessage}</p>}<button className="primary-btn" type="submit">Salvar exemplar</button></form></div>}
@@ -102,6 +95,10 @@ function App() {
   )
 }
 
+function DataSection({ active, books, readers, copies, loans }: { active: string; books: Book[]; readers: Reader[]; copies: Copy[]; loans: Loan[] }) {
+  const rows = active === 'Livros' ? books.map((x) => [x.title, `ISBN ${x.isbn13}`, `Categoria #${x.categoryId}`]) : active === 'Leitores' ? readers.map((x) => [x.fullName, x.registrationNumber, x.isSuspended ? 'Suspenso' : 'Ativo']) : active === 'Exemplares' ? copies.map((x) => [x.inventoryCode, `Livro #${x.bookId}`, x.status]) : loans.map((x) => [`Empréstimo #${x.loanId}`, `Leitor #${x.readerId} · Exemplar #${x.copyId}`, x.returnedAt ? 'Devolvido' : 'Ativo'])
+  return <section className="panel section-panel"><div className="section-heading"><h2>{active}</h2><span className="tag">{rows.length} registros</span></div><div className="data-table">{rows.map((row, i) => <div className="data-row" key={`${row[0]}-${i}`}><strong>{row[0]}</strong><span>{row[1]}</span><span className="tag">{row[2]}</span></div>)}</div>{rows.length === 0 && <div className="empty-state"><strong>Nenhum registro no banco</strong><small>Cadastre o primeiro registro usando o botão acima.</small></div>}</section>
+}
 function Metric({ value, label, accent, icon }: { value: string; label: string; accent: string; icon: string }) { return <div className={`metric ${accent}`}><div className="metric-icon">{icon}</div><div><strong>{value}</strong><span>{label}</span></div><small>↗</small></div> }
 
 export default App
