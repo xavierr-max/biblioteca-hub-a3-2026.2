@@ -34,3 +34,4 @@
 - Barra superior sem campo de pesquisa, mantendo ações e perfil alinhados à direita.
 - Perfil local editável da bibliotecária (nome, sobrenome, e-mail e telefone), armazenado no navegador; o sistema não exige autenticação nem criação de conta.
 - Card promocional “Biblioteca em movimento” removido da sidebar.
+- Link “Configurações” removido; sidebar fixa na viewport e apenas o conteúdo principal rola. Perfil fica ancorado no rodapé da sidebar.

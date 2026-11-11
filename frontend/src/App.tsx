@@ -116,7 +116,6 @@ function App() {
           ))}
         </nav>
         <div className="sidebar-bottom">
-          <button className="nav-item"><span className="nav-icon">settings</span>Configurações</button>
           <button className="profile profile-button" onClick={() => setProfileOpen(true)} aria-label="Editar perfil da bibliotecária"><div className="avatar">{initials}</div><div><strong>{profile.firstName} {profile.lastName}</strong><small>Bibliotecária · Editar perfil</small></div><span className="material-symbols-rounded">edit</span></button>
         </div>
       </aside>
