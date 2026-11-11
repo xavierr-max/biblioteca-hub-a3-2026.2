@@ -1,6 +1,8 @@
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5180/api'
 
-export type Book = { bookId: number; title: string; isbn13: string; categoryId: number; isArchived: boolean }
+export type Category = { categoryId: number; name: string; isActive: boolean }
+export type Author = { authorId: number; name: string }
+export type Book = { bookId: number; title: string; isbn13: string; categoryId: number; categoryName?: string; authors?: Author[]; isArchived: boolean }
 export type Reader = { readerId: number; fullName: string; registrationNumber: string; isSuspended: boolean }
 export type Copy = { copyId: number; bookId: number; inventoryCode: string; status: 'Available' | 'Loaned' | 'Maintenance' | 'Lost' }
 export type Loan = { loanId: number; copyId: number; readerId: number; loanedAt: string; dueAt: string; returnedAt: string | null }
@@ -14,8 +16,12 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 export const libraryApi = {
   books: () => request<Book[]>('/books'),
-  createBook: (body: Pick<Book, 'title' | 'isbn13' | 'categoryId'>) => request<Book>('/books', { method: 'POST', body: JSON.stringify(body) }),
-  updateBook: (id: number, body: Pick<Book, 'title' | 'isbn13' | 'categoryId' | 'isArchived'>) => request<Book>(`/books/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  categories: () => request<Category[]>('/categories'),
+  authors: () => request<Author[]>('/authors'),
+  createCategory: (body: Pick<Category, 'name' | 'isActive'>) => request<Category>('/categories', { method: 'POST', body: JSON.stringify(body) }),
+  createAuthor: (body: Pick<Author, 'name'>) => request<Author>('/authors', { method: 'POST', body: JSON.stringify(body) }),
+  createBook: (body: Pick<Book, 'title' | 'isbn13' | 'categoryId'> & { authorIds?: number[] }) => request<Book>('/books', { method: 'POST', body: JSON.stringify(body) }),
+  updateBook: (id: number, body: Pick<Book, 'title' | 'isbn13' | 'categoryId' | 'isArchived'> & { authorIds?: number[] }) => request<Book>(`/books/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   deleteBook: (id: number) => request<void>(`/books/${id}`, { method: 'DELETE' }),
   readers: () => request<Reader[]>('/readers'),
   createReader: (body: Pick<Reader, 'fullName' | 'registrationNumber'>) => request<Reader>('/readers', { method: 'POST', body: JSON.stringify(body) }),

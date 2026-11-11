@@ -28,3 +28,4 @@
 - Adicionada alternância Cards/Lista.
 - Substituídos diálogos nativos por modais próprios.
 - Modo Lista padronizado com colunas alinhadas para identificação, detalhe, status e ações.
+- API de categorias e autores criada; `GET /api/books` retorna categoria e autores relacionados.

@@ -16,7 +16,45 @@ if (app.Environment.IsDevelopment()) app.MapOpenApi();
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok", service = "biblioteca-api" }));
 app.MapGet("/api/books",
     async (LibraryDbContext db, CancellationToken ct) =>
-        Results.Ok(await db.Books.AsNoTracking().OrderBy(x => x.Title).ToListAsync(ct)));
+        Results.Ok(await db.Books.AsNoTracking().OrderBy(x => x.Title).Select(x => new BookDetails(x.BookId, x.Title, x.Isbn13, x.CategoryId, db.Categories.Where(c => c.CategoryId == x.CategoryId).Select(c => c.Name).FirstOrDefault() ?? "Sem categoria", x.IsArchived, db.BookAuthors.Where(ba => ba.BookId == x.BookId).Join(db.Authors, ba => ba.AuthorId, a => a.AuthorId, (_, a) => new AuthorDetails(a.AuthorId, a.Name)).ToList())).ToListAsync(ct)));
+app.MapGet("/api/categories", async (LibraryDbContext db, CancellationToken ct) => Results.Ok(await db.Categories.AsNoTracking().OrderBy(x => x.Name).ToListAsync(ct)));
+app.MapPost("/api/categories", async (CategoryRequest request, LibraryDbContext db, CancellationToken ct) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Name)) return Results.BadRequest(new { error = "Category name is required." });
+    if (await db.Categories.AnyAsync(x => x.Name == request.Name.Trim(), ct)) return Results.Conflict(new { error = "Category already exists." });
+    var category = new Category { Name = request.Name.Trim(), IsActive = request.IsActive };
+    db.Categories.Add(category); await db.SaveChangesAsync(ct); return Results.Created($"/api/categories/{category.CategoryId}", category);
+});
+app.MapPut("/api/categories/{id:long}", async (long id, CategoryRequest request, LibraryDbContext db, CancellationToken ct) =>
+{
+    var category = await db.Categories.FindAsync([id], ct); if (category is null) return Results.NotFound();
+    if (string.IsNullOrWhiteSpace(request.Name)) return Results.BadRequest(new { error = "Category name is required." });
+    category.Name = request.Name.Trim(); category.IsActive = request.IsActive; await db.SaveChangesAsync(ct); return Results.Ok(category);
+});
+app.MapDelete("/api/categories/{id:long}", async (long id, LibraryDbContext db, CancellationToken ct) =>
+{
+    var category = await db.Categories.FindAsync([id], ct); if (category is null) return Results.NotFound();
+    if (await db.Books.AnyAsync(x => x.CategoryId == id && !x.IsArchived, ct)) return Results.Conflict(new { error = "Category has active books." });
+    db.Categories.Remove(category); await db.SaveChangesAsync(ct); return Results.NoContent();
+});
+app.MapGet("/api/authors", async (LibraryDbContext db, CancellationToken ct) => Results.Ok(await db.Authors.AsNoTracking().OrderBy(x => x.Name).ToListAsync(ct)));
+app.MapPost("/api/authors", async (AuthorRequest request, LibraryDbContext db, CancellationToken ct) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Name)) return Results.BadRequest(new { error = "Author name is required." });
+    if (await db.Authors.AnyAsync(x => x.Name == request.Name.Trim(), ct)) return Results.Conflict(new { error = "Author already exists." });
+    var author = new Author { Name = request.Name.Trim() }; db.Authors.Add(author); await db.SaveChangesAsync(ct); return Results.Created($"/api/authors/{author.AuthorId}", author);
+});
+app.MapPut("/api/authors/{id:long}", async (long id, AuthorRequest request, LibraryDbContext db, CancellationToken ct) =>
+{
+    var author = await db.Authors.FindAsync([id], ct); if (author is null) return Results.NotFound();
+    if (string.IsNullOrWhiteSpace(request.Name)) return Results.BadRequest(new { error = "Author name is required." });
+    author.Name = request.Name.Trim(); await db.SaveChangesAsync(ct); return Results.Ok(author);
+});
+app.MapDelete("/api/authors/{id:long}", async (long id, LibraryDbContext db, CancellationToken ct) =>
+{
+    var author = await db.Authors.FindAsync([id], ct); if (author is null) return Results.NotFound();
+    db.Authors.Remove(author); await db.SaveChangesAsync(ct); return Results.NoContent();
+});
 app.MapPost("/api/books", async (CreateBookRequest request, LibraryDbContext db, CancellationToken ct) =>
 {
     if (string.IsNullOrWhiteSpace(request.Title) || request.Isbn13 is not { Length: 13 } ||
@@ -29,6 +67,7 @@ app.MapPost("/api/books", async (CreateBookRequest request, LibraryDbContext db,
     var book = new Book { Title = request.Title.Trim(), Isbn13 = request.Isbn13, CategoryId = request.CategoryId };
     db.Books.Add(book);
     await db.SaveChangesAsync(ct);
+    if (request.AuthorIds is not null) { db.BookAuthors.AddRange(request.AuthorIds.Distinct().Select(authorId => new BookAuthor { BookId = book.BookId, AuthorId = authorId })); await db.SaveChangesAsync(ct); }
     return Results.Created($"/api/books/{book.BookId}", book);
 });
 app.MapPut("/api/books/{id:long}", async (long id, UpdateBookRequest request, LibraryDbContext db, CancellationToken ct) =>
@@ -39,6 +78,8 @@ app.MapPut("/api/books/{id:long}", async (long id, UpdateBookRequest request, Li
     if (!await db.Categories.AnyAsync(x => x.CategoryId == request.CategoryId, ct)) return Results.BadRequest(new { error = "Category not found." });
     if (await db.Books.AnyAsync(x => x.BookId != id && x.Isbn13 == request.Isbn13, ct)) return Results.Conflict(new { error = "ISBN already exists." });
     book.Title = request.Title.Trim(); book.Isbn13 = request.Isbn13; book.CategoryId = request.CategoryId; book.IsArchived = request.IsArchived;
+    db.BookAuthors.RemoveRange(db.BookAuthors.Where(x => x.BookId == id));
+    if (request.AuthorIds is not null) db.BookAuthors.AddRange(request.AuthorIds.Distinct().Select(authorId => new BookAuthor { BookId = id, AuthorId = authorId }));
     await db.SaveChangesAsync(ct); return Results.Ok(book);
 });
 app.MapDelete("/api/books/{id:long}", async (long id, LibraryDbContext db, CancellationToken ct) =>
@@ -163,8 +204,12 @@ app.MapPost("/api/loans/{id:long}/return", async (long id, LibraryDbContext db, 
 });
 app.Run();
 
-public sealed record CreateBookRequest(string Title, string Isbn13, long CategoryId);
-public sealed record UpdateBookRequest(string Title, string Isbn13, long CategoryId, bool IsArchived);
+public sealed record CreateBookRequest(string Title, string Isbn13, long CategoryId, long[]? AuthorIds = null);
+public sealed record UpdateBookRequest(string Title, string Isbn13, long CategoryId, bool IsArchived, long[]? AuthorIds = null);
+public sealed record CategoryRequest(string Name, bool IsActive = true);
+public sealed record AuthorRequest(string Name);
+public sealed record AuthorDetails(long AuthorId, string Name);
+public sealed record BookDetails(long BookId, string Title, string Isbn13, long CategoryId, string CategoryName, bool IsArchived, List<AuthorDetails> Authors);
 
 public sealed record CreateReaderRequest(string FullName, string RegistrationNumber);
 public sealed record UpdateReaderRequest(string FullName, string RegistrationNumber, bool IsSuspended);
