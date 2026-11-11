@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { libraryApi, type Book, type Copy, type Loan, type Reader } from './services/api'
+import { libraryApi, type Author, type Book, type Category, type Copy, type Loan, type Reader } from './services/api'
 import './index.css'
 import './modal.css'
 
@@ -10,6 +10,10 @@ function App() {
   const [readers, setReaders] = useState<Reader[]>([])
   const [copies, setCopies] = useState<Copy[]>([])
   const [loans, setLoans] = useState<Loan[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [authors, setAuthors] = useState<Author[]>([])
+  const [catalogModal, setCatalogModal] = useState<'Categorias' | 'Autores' | null>(null)
+  const [catalogEdit, setCatalogEdit] = useState<{ type: 'Categorias' | 'Autores'; id?: number; name: string } | null>(null)
   const [showBookForm, setShowBookForm] = useState(false)
   const [bookForm, setBookForm] = useState({ title: '', isbn13: '', categoryId: '1' })
   const [showReaderForm, setShowReaderForm] = useState(false)
@@ -23,8 +27,8 @@ function App() {
   const [editState, setEditState] = useState<{ section: string; id: number } | null>(null)
   const [deleteState, setDeleteState] = useState<{ section: string; id: number } | null>(null)
   async function reloadData() {
-    const [bookData, readerData, copyData, loanData] = await Promise.all([libraryApi.books(), libraryApi.readers(), libraryApi.copies(), libraryApi.loans()])
-    setBooks(bookData); setReaders(readerData); setCopies(copyData); setLoans(loanData)
+    const [bookData, readerData, copyData, loanData, categoryData, authorData] = await Promise.all([libraryApi.books(), libraryApi.readers(), libraryApi.copies(), libraryApi.loans(), libraryApi.categories(), libraryApi.authors()])
+    setBooks(bookData); setReaders(readerData); setCopies(copyData); setLoans(loanData); setCategories(categoryData); setAuthors(authorData)
   }
   useEffect(() => { void reloadData().catch(() => undefined) }, [])
   function navigate(section: string) { setActive(section); localStorage.setItem('biblioteca.activeSection', section) }
@@ -36,6 +40,17 @@ function App() {
     event.preventDefault(); setFormMessage('Salvando...')
     try { await libraryApi.createBook({ ...bookForm, categoryId: Number(bookForm.categoryId) }); await reloadData(); setFormMessage('Livro cadastrado.'); setShowBookForm(false); setBookForm({ title: '', isbn13: '', categoryId: '1' }) }
     catch { setFormMessage('Não foi possível salvar. Verifique a API.') }
+  }
+  async function submitCatalog(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); if (!catalogEdit) return
+    try {
+      if (catalogEdit.type === 'Categorias') catalogEdit.id ? await libraryApi.updateCategory(catalogEdit.id, { name: catalogEdit.name, isActive: true }) : await libraryApi.createCategory({ name: catalogEdit.name, isActive: true })
+      else catalogEdit.id ? await libraryApi.updateAuthor(catalogEdit.id, { name: catalogEdit.name }) : await libraryApi.createAuthor({ name: catalogEdit.name })
+      await reloadData(); setCatalogEdit(null); setFormMessage('Registro salvo.')
+    } catch { setFormMessage('Não foi possível salvar. Verifique duplicidade e vínculos.') }
+  }
+  async function deleteCatalog(type: 'Categorias' | 'Autores', id: number) {
+    try { type === 'Categorias' ? await libraryApi.deleteCategory(id) : await libraryApi.deleteAuthor(id); await reloadData() } catch { setFormMessage('Não foi possível excluir. O registro pode possuir vínculos.') }
   }
   async function submitReader(event: FormEvent) {
     event.preventDefault(); setFormMessage('Salvando...')
@@ -87,7 +102,7 @@ function App() {
         <div className="brand"><span className="brand-mark">b</span> biblioteca</div>
         <div className="workspace-label">GESTÃO</div>
         <nav>
-          {['Dashboard', 'Livros', 'Leitores', 'Exemplares', 'Empréstimos'].map((item, index) => (
+          {['Dashboard', 'Livros', 'Leitores', 'Exemplares', 'Empréstimos', 'Categorias', 'Autores'].map((item, index) => (
             <button className={`nav-item ${active === item ? 'active' : ''}`} onClick={() => navigate(item)} key={item}>
               <span className="nav-icon">{['✦', '▣', '♙', '▤', '↗', '◒'][index]}</span>{item}
             </button>
@@ -105,8 +120,9 @@ function App() {
 
         <section className={`content-wrap ${active === 'Dashboard' ? 'dashboard-view' : 'section-view'}`}>
           <div className="eyebrow">{active === 'Dashboard' ? 'VISÃO GERAL' : 'CATÁLOGO DA BIBLIOTECA'}</div>
-          <div className="heading-row"><div><h1>{active === 'Dashboard' ? 'Olá, Marina.' : active}</h1><p>{active === 'Dashboard' ? 'Aqui está o que está acontecendo na sua biblioteca hoje.' : 'Acompanhe e organize seu acervo com simplicidade.'}</p></div><button className="primary-btn" onClick={() => { setFormMessage(''); active === 'Leitores' ? setShowReaderForm(true) : active === 'Exemplares' ? setShowCopyForm(true) : active === 'Empréstimos' ? setShowLoanForm(true) : setShowBookForm(true) }}>+ {active === 'Leitores' ? 'Novo leitor' : active === 'Exemplares' ? 'Novo exemplar' : active === 'Empréstimos' ? 'Novo empréstimo' : 'Novo livro'}</button></div>
-          {active !== 'Dashboard' && <DataSection active={active} books={books} readers={readers} copies={copies} loans={loans} onDelete={(section, id) => setDeleteState({ section, id })} onEdit={editRecord} />}
+          <div className="heading-row"><div><h1>{active === 'Dashboard' ? 'Olá, Marina.' : active}</h1><p>{active === 'Dashboard' ? 'Aqui está o que está acontecendo na sua biblioteca hoje.' : 'Acompanhe e organize seu acervo com simplicidade.'}</p></div><button className="primary-btn" onClick={() => { setFormMessage(''); active === 'Categorias' || active === 'Autores' ? (setCatalogModal(active), setCatalogEdit({ type: active, name: '' })) : active === 'Leitores' ? setShowReaderForm(true) : active === 'Exemplares' ? setShowCopyForm(true) : active === 'Empréstimos' ? setShowLoanForm(true) : setShowBookForm(true) }}>+ {active === 'Categorias' ? 'Nova categoria' : active === 'Autores' ? 'Novo autor' : active === 'Leitores' ? 'Novo leitor' : active === 'Exemplares' ? 'Novo exemplar' : active === 'Empréstimos' ? 'Novo empréstimo' : 'Novo livro'}</button></div>
+          {(active === 'Categorias' || active === 'Autores') && <CatalogSection type={active} categories={categories} authors={authors} onEdit={(type, item) => { setCatalogModal(type); setCatalogEdit({ type, id: item.id, name: item.name }) }} onDelete={deleteCatalog} />}
+          {active !== 'Dashboard' && active !== 'Categorias' && active !== 'Autores' && <DataSection active={active} books={books} readers={readers} copies={copies} loans={loans} onDelete={(section, id) => setDeleteState({ section, id })} onEdit={editRecord} />}
 
           <div className="hero-grid"><div className="hero-card"><div><span className="hero-kicker">RESUMO DO ACERVO</span><h2>Dados vivos,<br /><em>decisões melhores.</em></h2><p>Visão atualizada a partir dos registros do banco de dados.</p><button className="light-btn">Dados do backend ↗</button></div><div className="hero-art"><div className="book-shape one">{books.length}</div><div className="book-shape two">{copies.length}</div><div className="book-shape three">{readers.length}</div></div></div><div className="stats-card"><div className="card-label">EMPRÉSTIMOS ATIVOS <span>AO VIVO</span></div><div className="big-number">{activeLoans.length}</div><p>{overdueLoans} em atraso · {availableCopies} exemplares disponíveis</p><div className="live-meter"><span style={{ width: `${copies.length ? Math.min(100, (availableCopies / copies.length) * 100) : 0}%` }} /></div><div className="bar-labels"><span>Disponibilidade do acervo</span><span>{copies.length ? Math.round((availableCopies / copies.length) * 100) : 0}%</span></div></div></div>
 
@@ -118,6 +134,7 @@ function App() {
           {showReaderForm && <div className="modal-backdrop"><form className="book-form" onSubmit={submitReader}><div className="section-heading"><h2>Novo leitor</h2><button type="button" className="text-btn" onClick={() => setShowReaderForm(false)}>Fechar ×</button></div><label>Nome completo<input required value={readerForm.fullName} onChange={(e) => setReaderForm({ ...readerForm, fullName: e.target.value })} /></label><label>Matrícula<input required value={readerForm.registrationNumber} onChange={(e) => setReaderForm({ ...readerForm, registrationNumber: e.target.value })} /></label>{formMessage && <p className="api-message">{formMessage}</p>}<button className="primary-btn" type="submit">Salvar leitor</button></form></div>}
           {showCopyForm && <div className="modal-backdrop"><form className="book-form" onSubmit={submitCopy}><div className="section-heading"><h2>Novo exemplar</h2><button type="button" className="text-btn" onClick={() => setShowCopyForm(false)}>Fechar ×</button></div><label>ID do livro<input required type="number" min="1" value={copyForm.bookId} onChange={(e) => setCopyForm({ ...copyForm, bookId: e.target.value })} /></label><label>Código de inventário<input required value={copyForm.inventoryCode} onChange={(e) => setCopyForm({ ...copyForm, inventoryCode: e.target.value })} /></label>{formMessage && <p className="api-message">{formMessage}</p>}<button className="primary-btn" type="submit">Salvar exemplar</button></form></div>}
           {showLoanForm && <div className="modal-backdrop"><form className="book-form" onSubmit={submitLoan}><div className="section-heading"><h2>Novo empréstimo</h2><button type="button" className="text-btn" onClick={() => setShowLoanForm(false)}>Fechar ×</button></div><label>ID do leitor<input required type="number" min="1" value={loanForm.readerId} onChange={(e) => setLoanForm({ ...loanForm, readerId: e.target.value })} /></label><label>ID do exemplar<input required type="number" min="1" value={loanForm.copyId} onChange={(e) => setLoanForm({ ...loanForm, copyId: e.target.value })} /></label><p className="api-message">Prazo padrão: 14 dias corridos.</p>{formMessage && <p className="api-message">{formMessage}</p>}<button className="primary-btn" type="submit">Registrar empréstimo</button></form></div>}
+          {catalogModal && catalogEdit && <div className="modal-backdrop"><form className="book-form" onSubmit={submitCatalog}><div className="section-heading"><h2>{catalogEdit.id ? 'Editar' : 'Novo'} {catalogModal === 'Categorias' ? 'categoria' : 'autor'}</h2><button type="button" className="text-btn" onClick={() => { setCatalogModal(null); setCatalogEdit(null) }}>Fechar ×</button></div><label>Nome<input required value={catalogEdit.name} onChange={(e) => setCatalogEdit({ ...catalogEdit, name: e.target.value })} /></label>{formMessage && <p className="api-message">{formMessage}</p>}<button className="primary-btn" type="submit">Salvar</button></form></div>}
           {editState && <EditModal state={editState} books={books} readers={readers} copies={copies} loans={loans} onClose={() => setEditState(null)} onSubmit={submitEdit} />}
           {deleteState && <div className="modal-backdrop"><div className="book-form confirm-modal"><div className="section-heading"><h2>Excluir registro?</h2><button className="text-btn" onClick={() => setDeleteState(null)}>Fechar ×</button></div><p className="section-description">Essa ação será enviada para a API e poderá ser bloqueada se houver vínculos ativos.</p><div className="modal-actions"><button className="secondary-btn" onClick={() => setDeleteState(null)}>Cancelar</button><button className="danger-btn" onClick={() => void deleteRecord(deleteState.section, deleteState.id)}>Excluir registro</button></div></div></div>}
         </section>
@@ -130,6 +147,10 @@ function DataSection({ active, books, readers, copies, loans, onDelete, onEdit }
   const [view, setView] = useState<'cards' | 'list'>('cards')
   const rows = active === 'Livros' ? books.map((x) => ({ id: x.bookId, cells: [x.title, x.authors?.map((author) => author.name).join(', ') || 'Autores não informados', x.categoryName || `Categoria #${x.categoryId}`] })) : active === 'Leitores' ? readers.map((x) => ({ id: x.readerId, cells: [x.fullName, x.registrationNumber, x.isSuspended ? 'Suspenso' : 'Ativo'] })) : active === 'Exemplares' ? copies.map((x) => ({ id: x.copyId, cells: [x.inventoryCode, `Livro #${x.bookId}`, x.status] })) : loans.map((x) => ({ id: x.loanId, cells: [`Empréstimo #${x.loanId}`, `Leitor #${x.readerId} · Exemplar #${x.copyId}`, x.returnedAt ? 'Devolvido' : 'Ativo'] }))
   return <section className="panel section-panel"><div className="section-heading"><div><h2>{active}</h2><small className="section-description">Gerencie os registros com uma visão rápida e ações diretas.</small></div><div className="view-toggle"><button className={view === 'cards' ? 'selected' : ''} onClick={() => setView('cards')}>▦ Cards</button><button className={view === 'list' ? 'selected' : ''} onClick={() => setView('list')}>☷ Lista</button><span className="tag">{rows.length} registros</span></div></div>{view === 'cards' ? <div className="entity-grid">{rows.map((row) => <article className="entity-card" key={`${row.cells[0]}-${row.id}`}><div className={`entity-icon ${active.toLowerCase()}`}>{active === 'Livros' ? '▣' : active === 'Leitores' ? '♙' : active === 'Exemplares' ? '▤' : '↗'}</div><div className="entity-card-body"><span className="card-label">{active.slice(0, -1).toUpperCase()}</span><h3>{row.cells[0]}</h3><p>{row.cells[1]}</p><span className="tag">{row.cells[2]}</span></div><div className="entity-actions"><button onClick={() => onEdit(active, row.id)}>Editar</button><button onClick={() => onDelete(active, row.id)}>Excluir</button></div></article>)}</div> : <div className="data-table">{rows.map((row) => <div className="data-row" key={`${row.cells[0]}-${row.id}`}><strong>{row.cells[0]}</strong><span>{row.cells[1]}</span><span className="tag">{row.cells[2]}</span><button className="text-btn" onClick={() => onEdit(active, row.id)}>Editar</button><button className="text-btn" onClick={() => onDelete(active, row.id)}>Excluir</button></div>)}</div>}{rows.length === 0 && <div className="empty-state"><strong>Nenhum registro no banco</strong><small>Cadastre o primeiro registro usando o botão acima.</small></div>}</section>
+}
+function CatalogSection({ type, categories, authors, onEdit, onDelete }: { type: 'Categorias' | 'Autores'; categories: Category[]; authors: Author[]; onEdit: (type: 'Categorias' | 'Autores', item: { id: number; name: string }) => void; onDelete: (type: 'Categorias' | 'Autores', id: number) => void }) {
+  const items = type === 'Categorias' ? categories.map((x) => ({ id: x.categoryId, name: x.name, status: x.isActive ? 'Ativa' : 'Inativa' })) : authors.map((x) => ({ id: x.authorId, name: x.name, status: 'Autor' }))
+  return <section className="panel section-panel"><div className="section-heading"><div><h2>{type}</h2><small className="section-description">Cadastre e organize os dados usados no catálogo.</small></div><span className="tag">{items.length} registros</span></div><div className="entity-grid">{items.map((item) => <article className="entity-card" key={item.id}><div className="entity-icon">{type === 'Categorias' ? '▤' : '♙'}</div><div className="entity-card-body"><span className="card-label">{type === 'Categorias' ? 'CATEGORIA' : 'AUTOR'}</span><h3>{item.name}</h3><span className="tag">{item.status}</span></div><div className="entity-actions"><button onClick={() => onEdit(type, item)}>Editar</button><button onClick={() => onDelete(type, item.id)}>Excluir</button></div></article>)}</div>{items.length === 0 && <div className="empty-state"><strong>Nenhum registro cadastrado</strong><small>Use o botão acima para criar o primeiro.</small></div>}</section>
 }
 function EditModal({ state, books, readers, copies, loans, onClose, onSubmit }: { state: { section: string; id: number }; books: Book[]; readers: Reader[]; copies: Copy[]; loans: Loan[]; onClose: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void }) {
   const book = books.find((x) => x.bookId === state.id); const reader = readers.find((x) => x.readerId === state.id); const copy = copies.find((x) => x.copyId === state.id); const loan = loans.find((x) => x.loanId === state.id)
