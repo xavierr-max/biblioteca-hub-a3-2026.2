@@ -14,11 +14,13 @@ Entregar um sistema de gestão de biblioteca demonstrável, com dados persistido
 
 ## Próximos objetivos
 
-1. Implementar autenticação segura.
-2. Implementar autorização por perfis: Administrador, Bibliotecário e Leitor.
-3. Substituir identificadores manuais nos formulários por seleções carregadas da API.
-4. Ampliar testes de caixa preta, caixa branca e testes de interface.
-5. Documentar endpoints e fluxos principais.
+1. Substituir identificadores manuais nos formulários por seleções carregadas da API.
+2. Ampliar testes de caixa preta, caixa branca e testes de interface.
+3. Documentar endpoints e fluxos principais.
+
+## Decisão de acesso
+
+A aplicação é uma ferramenta local de gestão para a bibliotecária. Não exige login, cadastro de usuário, autenticação ou perfis de acesso. Os dados de identificação da bibliotecária são preferências locais para personalizar a interface.
 
 ## Critérios de qualidade
 

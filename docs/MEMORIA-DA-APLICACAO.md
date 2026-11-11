@@ -32,3 +32,4 @@
 - Frontend possui telas de Categorias e Autores com cards e modais de criação/edição, além de exclusão integrada à API.
 - Sidebar usa Google Fonts Material Symbols Rounded; ícone distinto por seção, incluindo Configurações.
 - Barra superior sem campo de pesquisa, mantendo ações e perfil alinhados à direita.
+- Perfil local editável da bibliotecária (nome, sobrenome, e-mail e telefone), armazenado no navegador; o sistema não exige autenticação nem criação de conta.

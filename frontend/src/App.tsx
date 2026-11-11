@@ -25,12 +25,21 @@ function App() {
   const [formMessage, setFormMessage] = useState('')
   const [editState, setEditState] = useState<{ section: string; id: number } | null>(null)
   const [deleteState, setDeleteState] = useState<{ section: string; id: number } | null>(null)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [profile, setProfile] = useState(() => {
+    const saved = localStorage.getItem('biblioteca.librarianProfile')
+    return saved ? JSON.parse(saved) as { firstName: string; lastName: string; email: string; phone: string } : { firstName: 'Marina', lastName: 'Silva', email: '', phone: '' }
+  })
   async function reloadData() {
     const [bookData, readerData, copyData, loanData, categoryData, authorData] = await Promise.all([libraryApi.books(), libraryApi.readers(), libraryApi.copies(), libraryApi.loans(), libraryApi.categories(), libraryApi.authors()])
     setBooks(bookData); setReaders(readerData); setCopies(copyData); setLoans(loanData); setCategories(categoryData); setAuthors(authorData)
   }
   useEffect(() => { void reloadData().catch(() => undefined) }, [])
   function navigate(section: string) { setActive(section); localStorage.setItem('biblioteca.activeSection', section) }
+  function saveProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); localStorage.setItem('biblioteca.librarianProfile', JSON.stringify(profile)); setProfileOpen(false)
+  }
+  const initials = `${profile.firstName[0] ?? ''}${profile.lastName[0] ?? ''}`.toUpperCase()
   const activeLoans = loans.filter((loan) => !loan.returnedAt)
   const availableCopies = copies.filter((copy) => copy.status === 'Available').length
   const overdueLoans = activeLoans.filter((loan) => new Date(loan.dueAt) < new Date()).length
@@ -109,12 +118,12 @@ function App() {
         <div className="sidebar-bottom">
           <div className="upgrade-card"><span className="spark">✦</span><strong>Biblioteca em movimento</strong><small>Organize seu acervo com clareza.</small><button>Explorar recursos ↗</button></div>
           <button className="nav-item"><span className="nav-icon">settings</span>Configurações</button>
-          <div className="profile"><div className="avatar">MS</div><div><strong>Marina Silva</strong><small>Bibliotecária</small></div><span>•••</span></div>
+          <button className="profile profile-button" onClick={() => setProfileOpen(true)} aria-label="Editar perfil da bibliotecária"><div className="avatar">{initials}</div><div><strong>{profile.firstName} {profile.lastName}</strong><small>Bibliotecária · Editar perfil</small></div><span className="material-symbols-rounded">edit</span></button>
         </div>
       </aside>
 
       <main className="main-content">
-        <header className="topbar"><div className="top-actions"><span className="notification">◌<i /></span><div className="mini-avatar">MS</div></div></header>
+        <header className="topbar"><div className="top-actions"><span className="notification">◌<i /></span><button className="mini-avatar profile-avatar-button" onClick={() => setProfileOpen(true)} aria-label="Editar perfil">{initials}</button></div></header>
 
         <section className={`content-wrap ${active === 'Dashboard' ? 'dashboard-view' : 'section-view'}`}>
           <div className="eyebrow">{active === 'Dashboard' ? 'VISÃO GERAL' : 'CATÁLOGO DA BIBLIOTECA'}</div>
@@ -133,6 +142,7 @@ function App() {
           {showCopyForm && <div className="modal-backdrop"><form className="book-form" onSubmit={submitCopy}><div className="section-heading"><h2>Novo exemplar</h2><button type="button" className="text-btn" onClick={() => setShowCopyForm(false)}>Fechar ×</button></div><label>ID do livro<input required type="number" min="1" value={copyForm.bookId} onChange={(e) => setCopyForm({ ...copyForm, bookId: e.target.value })} /></label><label>Código de inventário<input required value={copyForm.inventoryCode} onChange={(e) => setCopyForm({ ...copyForm, inventoryCode: e.target.value })} /></label>{formMessage && <p className="api-message">{formMessage}</p>}<button className="primary-btn" type="submit">Salvar exemplar</button></form></div>}
           {showLoanForm && <div className="modal-backdrop"><form className="book-form" onSubmit={submitLoan}><div className="section-heading"><h2>Novo empréstimo</h2><button type="button" className="text-btn" onClick={() => setShowLoanForm(false)}>Fechar ×</button></div><label>ID do leitor<input required type="number" min="1" value={loanForm.readerId} onChange={(e) => setLoanForm({ ...loanForm, readerId: e.target.value })} /></label><label>ID do exemplar<input required type="number" min="1" value={loanForm.copyId} onChange={(e) => setLoanForm({ ...loanForm, copyId: e.target.value })} /></label><p className="api-message">Prazo padrão: 14 dias corridos.</p>{formMessage && <p className="api-message">{formMessage}</p>}<button className="primary-btn" type="submit">Registrar empréstimo</button></form></div>}
           {catalogModal && catalogEdit && <div className="modal-backdrop"><form className="book-form" onSubmit={submitCatalog}><div className="section-heading"><h2>{catalogEdit.id ? 'Editar' : 'Novo'} {catalogModal === 'Categorias' ? 'categoria' : 'autor'}</h2><button type="button" className="text-btn" onClick={() => { setCatalogModal(null); setCatalogEdit(null) }}>Fechar ×</button></div><label>Nome<input required value={catalogEdit.name} onChange={(e) => setCatalogEdit({ ...catalogEdit, name: e.target.value })} /></label>{formMessage && <p className="api-message">{formMessage}</p>}<button className="primary-btn" type="submit">Salvar</button></form></div>}
+          {profileOpen && <div className="modal-backdrop"><form className="book-form" onSubmit={saveProfile}><div className="section-heading"><div><span className="card-label">PREFERÊNCIAS</span><h2>Perfil da bibliotecária</h2></div><button type="button" className="text-btn" onClick={() => setProfileOpen(false)}>Fechar ×</button></div><p className="section-description">Esses dados personalizam sua experiência neste navegador. Não é necessário criar uma conta ou entrar.</p><label>Nome<input required value={profile.firstName} onChange={(e) => setProfile({ ...profile, firstName: e.target.value })} /></label><label>Sobrenome<input required value={profile.lastName} onChange={(e) => setProfile({ ...profile, lastName: e.target.value })} /></label><label>E-mail (opcional)<input type="email" value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} /></label><label>Telefone (opcional)<input type="tel" value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} /></label><div className="modal-actions"><button type="button" className="secondary-btn" onClick={() => setProfileOpen(false)}>Cancelar</button><button className="primary-btn" type="submit">Salvar perfil</button></div></form></div>}
           {editState && <EditModal state={editState} books={books} readers={readers} copies={copies} loans={loans} onClose={() => setEditState(null)} onSubmit={submitEdit} />}
           {deleteState && <div className="modal-backdrop"><div className="book-form confirm-modal"><div className="section-heading"><h2>Excluir registro?</h2><button className="text-btn" onClick={() => setDeleteState(null)}>Fechar ×</button></div><p className="section-description">Essa ação será enviada para a API e poderá ser bloqueada se houver vínculos ativos.</p><div className="modal-actions"><button className="secondary-btn" onClick={() => setDeleteState(null)}>Cancelar</button><button className="danger-btn" onClick={() => void deleteRecord(deleteState.section, deleteState.id)}>Excluir registro</button></div></div></div>}
         </section>
