@@ -33,3 +33,4 @@
 - Sidebar usa Google Fonts Material Symbols Rounded; ícone distinto por seção, incluindo Configurações.
 - Barra superior sem campo de pesquisa, mantendo ações e perfil alinhados à direita.
 - Perfil local editável da bibliotecária (nome, sobrenome, e-mail e telefone), armazenado no navegador; o sistema não exige autenticação nem criação de conta.
+- Card promocional “Biblioteca em movimento” removido da sidebar.
