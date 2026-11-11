@@ -31,3 +31,4 @@
 - API de categorias e autores criada; `GET /api/books` retorna categoria e autores relacionados.
 - Frontend possui telas de Categorias e Autores com cards e modais de criação/edição, além de exclusão integrada à API.
 - Sidebar usa Google Fonts Material Symbols Rounded; ícone distinto por seção, incluindo Configurações.
+- Barra superior sem campo de pesquisa, mantendo ações e perfil alinhados à direita.
