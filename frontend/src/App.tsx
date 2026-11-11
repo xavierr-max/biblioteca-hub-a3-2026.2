@@ -102,15 +102,15 @@ function App() {
         <div className="brand"><span className="brand-mark">b</span> biblioteca</div>
         <div className="workspace-label">GESTÃO</div>
         <nav>
-          {['Dashboard', 'Livros', 'Leitores', 'Exemplares', 'Empréstimos', 'Categorias', 'Autores'].map((item, index) => (
+          {[['Dashboard', 'space_dashboard'], ['Livros', 'menu_book'], ['Leitores', 'groups'], ['Exemplares', 'inventory_2'], ['Empréstimos', 'swap_horiz'], ['Categorias', 'category'], ['Autores', 'edit_note']].map(([item, icon]) => (
             <button className={`nav-item ${active === item ? 'active' : ''}`} onClick={() => navigate(item)} key={item}>
-              <span className="nav-icon">{['✦', '▣', '♙', '▤', '↗', '◒'][index]}</span>{item}
+              <span className="nav-icon">{icon}</span>{item}
             </button>
           ))}
         </nav>
         <div className="sidebar-bottom">
           <div className="upgrade-card"><span className="spark">✦</span><strong>Biblioteca em movimento</strong><small>Organize seu acervo com clareza.</small><button>Explorar recursos ↗</button></div>
-          <button className="nav-item"><span className="nav-icon">⚙</span>Configurações</button>
+          <button className="nav-item"><span className="nav-icon">settings</span>Configurações</button>
           <div className="profile"><div className="avatar">MS</div><div><strong>Marina Silva</strong><small>Bibliotecária</small></div><span>•••</span></div>
         </div>
       </aside>
