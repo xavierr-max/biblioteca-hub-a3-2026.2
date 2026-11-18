@@ -4,6 +4,20 @@ Projeto acadêmico de Banco de Dados e Testes de Software. Primeira etapa: model
 
 ## Subir
 
+No Ubuntu, dê permissão aos scripts e execute o lançador. Ele inicia o MySQL,
+a API, o frontend e abre o sistema no navegador:
+
+```bash
+chmod +x iniciar-biblioteca.sh parar-biblioteca.sh
+./iniciar-biblioteca.sh
+```
+
+Para encerrar a aplicação sem apagar os dados do banco:
+
+```bash
+./parar-biblioteca.sh
+```
+
 Copie `.env.example` para `.env`, execute `docker compose up -d` e aguarde `docker compose ps` mostrar `healthy`. O primeiro start cria automaticamente o schema e carrega os dados de demonstração em `database/scripts/01-schema.sql` e `database/seeds/01-demo-data.sql`.
 
 No MySQL Workbench ou DBeaver use `localhost:3306`, banco `biblioteca`, e as credenciais do `.env`. A senha deve permanecer somente no `.env` local, que está ignorado pelo Git.

@@ -7,7 +7,8 @@ docker compose up -d mysql | Out-Host
 
 $mysqlReady = $false
 for ($attempt = 1; $attempt -le 30; $attempt++) {
-    $status = docker inspect -f '{{.State.Health.Status}}' biblioteca-gestao-mysql 2>$null
+    $mysqlContainer = docker compose ps -q mysql
+    $status = if ($mysqlContainer) { docker inspect -f '{{.State.Health.Status}}' $mysqlContainer 2>$null } else { '' }
     if ($status -eq 'healthy') { $mysqlReady = $true; break }
     Start-Sleep -Seconds 2
 }
