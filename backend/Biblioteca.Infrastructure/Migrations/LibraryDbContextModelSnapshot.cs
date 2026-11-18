@@ -16,7 +16,7 @@ namespace Biblioteca.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.1")
+                .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("Biblioteca.Domain.Book", b =>
@@ -34,6 +34,9 @@ namespace Biblioteca.Infrastructure.Migrations
                     b.Property<string>("Isbn13")
                         .IsRequired()
                         .HasColumnType("char(13)");
+
+                    b.Property<long>("PublisherId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -140,6 +143,21 @@ namespace Biblioteca.Infrastructure.Migrations
                     b.ToTable("BookAuthors", (string)null);
                 });
 
+            modelBuilder.Entity("Biblioteca.Infrastructure.BookGenre", b =>
+                {
+                    b.Property<long>("BookId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("GenreId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("BookId", "GenreId");
+
+                    b.HasIndex("GenreId");
+
+                    b.ToTable("BookGenres", (string)null);
+                });
+
             modelBuilder.Entity("Biblioteca.Infrastructure.Category", b =>
                 {
                     b.Property<long>("CategoryId")
@@ -160,6 +178,57 @@ namespace Biblioteca.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Categories", (string)null);
+                });
+
+            modelBuilder.Entity("Biblioteca.Infrastructure.Fine", b =>
+                {
+                    b.Property<long>("FineId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long>("LoanId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.HasKey("FineId");
+
+                    b.HasIndex("LoanId")
+                        .IsUnique();
+
+                    b.ToTable("Fines", (string)null);
+                });
+
+            modelBuilder.Entity("Biblioteca.Infrastructure.Genre", b =>
+                {
+                    b.Property<long>("GenreId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("GenreId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Genres", (string)null);
                 });
 
             modelBuilder.Entity("Biblioteca.Infrastructure.Loan", b =>
@@ -190,6 +259,54 @@ namespace Biblioteca.Infrastructure.Migrations
                     b.HasIndex("ReaderId", "ReturnedAt");
 
                     b.ToTable("Loans", (string)null);
+                });
+
+            modelBuilder.Entity("Biblioteca.Infrastructure.Publisher", b =>
+                {
+                    b.Property<long>("PublisherId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.HasKey("PublisherId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Publishers", (string)null);
+                });
+
+            modelBuilder.Entity("Biblioteca.Infrastructure.Reservation", b =>
+                {
+                    b.Property<long>("ReservationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("BookId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ReaderId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("ReservedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.HasKey("ReservationId");
+
+                    b.HasIndex("ReaderId");
+
+                    b.HasIndex("BookId", "Status");
+
+                    b.ToTable("Reservations", (string)null);
                 });
 
             modelBuilder.Entity("Biblioteca.Domain.Book", b =>
@@ -225,11 +342,50 @@ namespace Biblioteca.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Biblioteca.Infrastructure.BookGenre", b =>
+                {
+                    b.HasOne("Biblioteca.Domain.Book", null)
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Biblioteca.Infrastructure.Genre", null)
+                        .WithMany()
+                        .HasForeignKey("GenreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Biblioteca.Infrastructure.Fine", b =>
+                {
+                    b.HasOne("Biblioteca.Infrastructure.Loan", null)
+                        .WithMany()
+                        .HasForeignKey("LoanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Biblioteca.Infrastructure.Loan", b =>
                 {
                     b.HasOne("Biblioteca.Domain.Copy", null)
                         .WithMany()
                         .HasForeignKey("CopyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Biblioteca.Domain.Reader", null)
+                        .WithMany()
+                        .HasForeignKey("ReaderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Biblioteca.Infrastructure.Reservation", b =>
+                {
+                    b.HasOne("Biblioteca.Domain.Book", null)
+                        .WithMany()
+                        .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

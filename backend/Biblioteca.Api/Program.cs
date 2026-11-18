@@ -55,6 +55,20 @@ app.MapDelete("/api/authors/{id:long}", async (long id, LibraryDbContext db, Can
     var author = await db.Authors.FindAsync([id], ct); if (author is null) return Results.NotFound();
     db.Authors.Remove(author); await db.SaveChangesAsync(ct); return Results.NoContent();
 });
+app.MapGet("/api/publishers", async (LibraryDbContext db, CancellationToken ct) => Results.Ok(await db.Publishers.AsNoTracking().OrderBy(x => x.Name).ToListAsync(ct)));
+app.MapPost("/api/publishers", async (NameRequest request, LibraryDbContext db, CancellationToken ct) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Name)) return Results.BadRequest(new { error = "Publisher name is required." });
+    if (await db.Publishers.AnyAsync(x => x.Name == request.Name.Trim(), ct)) return Results.Conflict(new { error = "Publisher already exists." });
+    var publisher = new Publisher { Name = request.Name.Trim() }; db.Publishers.Add(publisher); await db.SaveChangesAsync(ct); return Results.Created($"/api/publishers/{publisher.PublisherId}", publisher);
+});
+app.MapGet("/api/genres", async (LibraryDbContext db, CancellationToken ct) => Results.Ok(await db.Genres.AsNoTracking().OrderBy(x => x.Name).ToListAsync(ct)));
+app.MapPost("/api/genres", async (NameRequest request, LibraryDbContext db, CancellationToken ct) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Name)) return Results.BadRequest(new { error = "Genre name is required." });
+    if (await db.Genres.AnyAsync(x => x.Name == request.Name.Trim(), ct)) return Results.Conflict(new { error = "Genre already exists." });
+    var genre = new Genre { Name = request.Name.Trim() }; db.Genres.Add(genre); await db.SaveChangesAsync(ct); return Results.Created($"/api/genres/{genre.GenreId}", genre);
+});
 app.MapPost("/api/books", async (CreateBookRequest request, LibraryDbContext db, CancellationToken ct) =>
 {
     if (string.IsNullOrWhiteSpace(request.Title) || request.Isbn13 is not { Length: 13 } ||
@@ -62,12 +76,17 @@ app.MapPost("/api/books", async (CreateBookRequest request, LibraryDbContext db,
         return Results.BadRequest(new { error = "Title and a valid ISBN-13 are required." });
     if (!await db.Categories.AnyAsync(x => x.CategoryId == request.CategoryId, ct))
         return Results.BadRequest(new { error = "Category not found." });
+    var publisherId = request.PublisherId ?? await db.Publishers.Select(x => (long?)x.PublisherId).FirstOrDefaultAsync(ct);
+    if (publisherId is null || !await db.Publishers.AnyAsync(x => x.PublisherId == publisherId, ct))
+        return Results.BadRequest(new { error = "Publisher not found." });
     if (await db.Books.AnyAsync(x => x.Isbn13 == request.Isbn13, ct))
         return Results.Conflict(new { error = "ISBN already exists." });
-    var book = new Book { Title = request.Title.Trim(), Isbn13 = request.Isbn13, CategoryId = request.CategoryId };
+    var book = new Book { Title = request.Title.Trim(), Isbn13 = request.Isbn13, CategoryId = request.CategoryId, PublisherId = publisherId.Value };
     db.Books.Add(book);
     await db.SaveChangesAsync(ct);
-    if (request.AuthorIds is not null) { db.BookAuthors.AddRange(request.AuthorIds.Distinct().Select(authorId => new BookAuthor { BookId = book.BookId, AuthorId = authorId })); await db.SaveChangesAsync(ct); }
+    if (request.AuthorIds is not null) db.BookAuthors.AddRange(request.AuthorIds.Distinct().Select(authorId => new BookAuthor { BookId = book.BookId, AuthorId = authorId }));
+    if (request.GenreIds is not null) db.BookGenres.AddRange(request.GenreIds.Distinct().Select(genreId => new BookGenre { BookId = book.BookId, GenreId = genreId }));
+    await db.SaveChangesAsync(ct);
     return Results.Created($"/api/books/{book.BookId}", book);
 });
 app.MapPut("/api/books/{id:long}", async (long id, UpdateBookRequest request, LibraryDbContext db, CancellationToken ct) =>
@@ -76,10 +95,14 @@ app.MapPut("/api/books/{id:long}", async (long id, UpdateBookRequest request, Li
     if (book is null) return Results.NotFound();
     if (string.IsNullOrWhiteSpace(request.Title) || request.Isbn13 is not { Length: 13 } || !request.Isbn13.All(char.IsDigit)) return Results.BadRequest(new { error = "Title and a valid ISBN-13 are required." });
     if (!await db.Categories.AnyAsync(x => x.CategoryId == request.CategoryId, ct)) return Results.BadRequest(new { error = "Category not found." });
+    var publisherId = request.PublisherId ?? await db.Publishers.Select(x => (long?)x.PublisherId).FirstOrDefaultAsync(ct);
+    if (publisherId is null || !await db.Publishers.AnyAsync(x => x.PublisherId == publisherId, ct)) return Results.BadRequest(new { error = "Publisher not found." });
     if (await db.Books.AnyAsync(x => x.BookId != id && x.Isbn13 == request.Isbn13, ct)) return Results.Conflict(new { error = "ISBN already exists." });
-    book.Title = request.Title.Trim(); book.Isbn13 = request.Isbn13; book.CategoryId = request.CategoryId; book.IsArchived = request.IsArchived;
+    book.Title = request.Title.Trim(); book.Isbn13 = request.Isbn13; book.CategoryId = request.CategoryId; book.PublisherId = publisherId.Value; book.IsArchived = request.IsArchived;
     db.BookAuthors.RemoveRange(db.BookAuthors.Where(x => x.BookId == id));
     if (request.AuthorIds is not null) db.BookAuthors.AddRange(request.AuthorIds.Distinct().Select(authorId => new BookAuthor { BookId = id, AuthorId = authorId }));
+    db.BookGenres.RemoveRange(db.BookGenres.Where(x => x.BookId == id));
+    if (request.GenreIds is not null) db.BookGenres.AddRange(request.GenreIds.Distinct().Select(genreId => new BookGenre { BookId = id, GenreId = genreId }));
     await db.SaveChangesAsync(ct); return Results.Ok(book);
 });
 app.MapDelete("/api/books/{id:long}", async (long id, LibraryDbContext db, CancellationToken ct) =>
@@ -202,12 +225,27 @@ app.MapPost("/api/loans/{id:long}/return", async (long id, LibraryDbContext db, 
     await transaction.CommitAsync(ct);
     return Results.Ok(loan);
 });
+app.MapGet("/api/reservations", async (LibraryDbContext db, CancellationToken ct) => Results.Ok(await db.Reservations.AsNoTracking().OrderByDescending(x => x.ReservedAt).ToListAsync(ct)));
+app.MapPost("/api/reservations", async (CreateReservationRequest request, LibraryDbContext db, CancellationToken ct) =>
+{
+    if (!await db.Books.AnyAsync(x => x.BookId == request.BookId && !x.IsArchived, ct) || !await db.Readers.AnyAsync(x => x.ReaderId == request.ReaderId, ct)) return Results.BadRequest(new { error = "Book or reader not found." });
+    if (await db.Reservations.AnyAsync(x => x.BookId == request.BookId && x.ReaderId == request.ReaderId && x.Status == "ACTIVE", ct)) return Results.Conflict(new { error = "Active reservation already exists." });
+    var reservation = new Reservation { BookId = request.BookId, ReaderId = request.ReaderId }; db.Reservations.Add(reservation); await db.SaveChangesAsync(ct); return Results.Created($"/api/reservations/{reservation.ReservationId}", reservation);
+});
+app.MapGet("/api/fines", async (LibraryDbContext db, CancellationToken ct) => Results.Ok(await db.Fines.AsNoTracking().OrderByDescending(x => x.CreatedAt).ToListAsync(ct)));
+app.MapPost("/api/fines", async (CreateFineRequest request, LibraryDbContext db, CancellationToken ct) =>
+{
+    if (request.Amount <= 0 || !await db.Loans.AnyAsync(x => x.LoanId == request.LoanId, ct)) return Results.BadRequest(new { error = "Valid loan and positive amount are required." });
+    if (await db.Fines.AnyAsync(x => x.LoanId == request.LoanId, ct)) return Results.Conflict(new { error = "Fine already exists for this loan." });
+    var fine = new Fine { LoanId = request.LoanId, Amount = request.Amount, Reason = string.IsNullOrWhiteSpace(request.Reason) ? "OVERDUE" : request.Reason.Trim() }; db.Fines.Add(fine); await db.SaveChangesAsync(ct); return Results.Created($"/api/fines/{fine.FineId}", fine);
+});
 app.Run();
 
-public sealed record CreateBookRequest(string Title, string Isbn13, long CategoryId, long[]? AuthorIds = null);
-public sealed record UpdateBookRequest(string Title, string Isbn13, long CategoryId, bool IsArchived, long[]? AuthorIds = null);
+public sealed record CreateBookRequest(string Title, string Isbn13, long CategoryId, long? PublisherId = null, long[]? AuthorIds = null, long[]? GenreIds = null);
+public sealed record UpdateBookRequest(string Title, string Isbn13, long CategoryId, bool IsArchived, long? PublisherId = null, long[]? AuthorIds = null, long[]? GenreIds = null);
 public sealed record CategoryRequest(string Name, bool IsActive = true);
 public sealed record AuthorRequest(string Name);
+public sealed record NameRequest(string Name);
 public sealed record AuthorDetails(long AuthorId, string Name);
 public sealed record BookDetails(long BookId, string Title, string Isbn13, long CategoryId, string CategoryName, bool IsArchived, List<AuthorDetails> Authors);
 
@@ -219,3 +257,5 @@ public sealed record UpdateCopyRequest(long BookId, string InventoryCode, CopySt
 
 public sealed record CreateLoanRequest(long ReaderId, long CopyId);
 public sealed record UpdateLoanRequest(long ReaderId, long CopyId, DateTime? DueAt, DateTime? ReturnedAt);
+public sealed record CreateReservationRequest(long BookId, long ReaderId);
+public sealed record CreateFineRequest(long LoanId, decimal Amount, string? Reason = null);

@@ -6,6 +6,7 @@ public sealed class Book
     public required string Title { get; set; }
     public required string Isbn13 { get; set; }
     public long CategoryId { get; set; }
+    public long PublisherId { get; set; }
     public bool IsArchived { get; set; }
 }
 
