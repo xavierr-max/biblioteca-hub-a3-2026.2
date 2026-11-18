@@ -62,12 +62,24 @@ app.MapPost("/api/publishers", async (NameRequest request, LibraryDbContext db, 
     if (await db.Publishers.AnyAsync(x => x.Name == request.Name.Trim(), ct)) return Results.Conflict(new { error = "Publisher already exists." });
     var publisher = new Publisher { Name = request.Name.Trim() }; db.Publishers.Add(publisher); await db.SaveChangesAsync(ct); return Results.Created($"/api/publishers/{publisher.PublisherId}", publisher);
 });
+app.MapDelete("/api/publishers/{id:long}", async (long id, LibraryDbContext db, CancellationToken ct) =>
+{
+    var publisher = await db.Publishers.FindAsync([id], ct); if (publisher is null) return Results.NotFound();
+    if (await db.Books.AnyAsync(x => x.PublisherId == id, ct)) return Results.Conflict(new { error = "Publisher has books." });
+    db.Publishers.Remove(publisher); await db.SaveChangesAsync(ct); return Results.NoContent();
+});
 app.MapGet("/api/genres", async (LibraryDbContext db, CancellationToken ct) => Results.Ok(await db.Genres.AsNoTracking().OrderBy(x => x.Name).ToListAsync(ct)));
 app.MapPost("/api/genres", async (NameRequest request, LibraryDbContext db, CancellationToken ct) =>
 {
     if (string.IsNullOrWhiteSpace(request.Name)) return Results.BadRequest(new { error = "Genre name is required." });
     if (await db.Genres.AnyAsync(x => x.Name == request.Name.Trim(), ct)) return Results.Conflict(new { error = "Genre already exists." });
     var genre = new Genre { Name = request.Name.Trim() }; db.Genres.Add(genre); await db.SaveChangesAsync(ct); return Results.Created($"/api/genres/{genre.GenreId}", genre);
+});
+app.MapDelete("/api/genres/{id:long}", async (long id, LibraryDbContext db, CancellationToken ct) =>
+{
+    var genre = await db.Genres.FindAsync([id], ct); if (genre is null) return Results.NotFound();
+    if (await db.BookGenres.AnyAsync(x => x.GenreId == id, ct)) return Results.Conflict(new { error = "Genre has books." });
+    db.Genres.Remove(genre); await db.SaveChangesAsync(ct); return Results.NoContent();
 });
 app.MapPost("/api/books", async (CreateBookRequest request, LibraryDbContext db, CancellationToken ct) =>
 {
@@ -232,12 +244,22 @@ app.MapPost("/api/reservations", async (CreateReservationRequest request, Librar
     if (await db.Reservations.AnyAsync(x => x.BookId == request.BookId && x.ReaderId == request.ReaderId && x.Status == "ACTIVE", ct)) return Results.Conflict(new { error = "Active reservation already exists." });
     var reservation = new Reservation { BookId = request.BookId, ReaderId = request.ReaderId }; db.Reservations.Add(reservation); await db.SaveChangesAsync(ct); return Results.Created($"/api/reservations/{reservation.ReservationId}", reservation);
 });
+app.MapDelete("/api/reservations/{id:long}", async (long id, LibraryDbContext db, CancellationToken ct) =>
+{
+    var reservation = await db.Reservations.FindAsync([id], ct); if (reservation is null) return Results.NotFound();
+    db.Reservations.Remove(reservation); await db.SaveChangesAsync(ct); return Results.NoContent();
+});
 app.MapGet("/api/fines", async (LibraryDbContext db, CancellationToken ct) => Results.Ok(await db.Fines.AsNoTracking().OrderByDescending(x => x.CreatedAt).ToListAsync(ct)));
 app.MapPost("/api/fines", async (CreateFineRequest request, LibraryDbContext db, CancellationToken ct) =>
 {
     if (request.Amount <= 0 || !await db.Loans.AnyAsync(x => x.LoanId == request.LoanId, ct)) return Results.BadRequest(new { error = "Valid loan and positive amount are required." });
     if (await db.Fines.AnyAsync(x => x.LoanId == request.LoanId, ct)) return Results.Conflict(new { error = "Fine already exists for this loan." });
     var fine = new Fine { LoanId = request.LoanId, Amount = request.Amount, Reason = string.IsNullOrWhiteSpace(request.Reason) ? "OVERDUE" : request.Reason.Trim() }; db.Fines.Add(fine); await db.SaveChangesAsync(ct); return Results.Created($"/api/fines/{fine.FineId}", fine);
+});
+app.MapDelete("/api/fines/{id:long}", async (long id, LibraryDbContext db, CancellationToken ct) =>
+{
+    var fine = await db.Fines.FindAsync([id], ct); if (fine is null) return Results.NotFound();
+    db.Fines.Remove(fine); await db.SaveChangesAsync(ct); return Results.NoContent();
 });
 app.Run();
 

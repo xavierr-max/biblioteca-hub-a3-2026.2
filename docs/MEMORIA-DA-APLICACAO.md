@@ -57,6 +57,8 @@
 - Evidência de caixa preta ampliada com leitor suspenso, exemplar indisponível, ISBN duplicado, empréstimo válido, primeira devolução e segunda devolução; todos os seis cenários aprovados.
 - Testes adicionais de reservas e multas aprovados: criação válida, duplicidade de reserva, valor de multa inválido e duplicidade de multa.
 - Criados o relatório-base `docs/RELATORIO-FINAL-A3.md` e o roteiro-base `docs/PITCH-ROTEIRO-A3.md`, já identificados com os quatro integrantes do grupo.
+- API das novas entidades recebeu exclusão com proteção contra vínculos para editoras e gêneros, além de exclusão de reservas e multas.
+- Validação final desta etapa: backend build sem warnings, 14 testes aprovados e frontend build aprovado.
 - Evidência de cobertura gerada em `tests/evidencias/backend-coverage`; cobertura global atual: 5,04% de linhas e 3,14% de branches, indicando a necessidade de testes adicionais de API e frontend.
 - Criados os lançadores clicáveis `iniciar-biblioteca.cmd` e `parar-biblioteca.cmd` para iniciar/parar a aplicação localmente; o lançador inicia o MySQL, API, frontend e abre o navegador.
 - `npm run lint` permanece pendente por bloqueio da política de execução do Windows sobre o binário nativo do `oxlint`.
