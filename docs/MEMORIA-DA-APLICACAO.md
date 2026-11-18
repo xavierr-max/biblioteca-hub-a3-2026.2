@@ -47,11 +47,16 @@
 - Frontend atualizado para carregar e exibir editoras, gêneros, reservas e multas via API.
 - Build de produção do frontend aprovado após `npm install` e `npm run build`.
 - Frontend agora possui formulários conectados à API para cadastrar editoras, gêneros, reservas e multas.
+- Formulários de livros, exemplares, empréstimos, reservas e multas passaram a usar seleções carregadas da API em vez de exigir IDs digitados; livros também podem receber múltiplos autores.
 - Formulário de livros passou a carregar categorias, editoras e gêneros diretamente da API; gênero e editora são enviados no cadastro.
 - Após a correção de processo bloqueando o executável, backend e frontend foram validados novamente: build aprovado e 10 testes backend aprovados.
 - Seed ampliado e aplicado no banco atual: 5 livros, 5 exemplares, 4 leitores, 1 empréstimo atrasado, 1 reserva ativa e 1 multa em aberto.
 - `02-demo-queries.sql` agora contém três consultas de apresentação envolvendo acervo, empréstimos e multas, e foi executado com sucesso no MySQL.
 - Suíte backend ampliada para 14 testes aprovados, incluindo razões de rejeição e valores-limite das regras de empréstimo.
+- Testes de caixa preta da API executados contra MySQL real: health, leitura de livros, reservas, multas e rejeição de editora duplicada, todos aprovados; evidência em `tests/evidencias/api-black-box-2026-11-18.md`.
+- Evidência de caixa preta ampliada com leitor suspenso, exemplar indisponível, ISBN duplicado, empréstimo válido, primeira devolução e segunda devolução; todos os seis cenários aprovados.
+- Testes adicionais de reservas e multas aprovados: criação válida, duplicidade de reserva, valor de multa inválido e duplicidade de multa.
+- Criados o relatório-base `docs/RELATORIO-FINAL-A3.md` e o roteiro-base `docs/PITCH-ROTEIRO-A3.md`, já identificados com os quatro integrantes do grupo.
 - Evidência de cobertura gerada em `tests/evidencias/backend-coverage`; cobertura global atual: 5,04% de linhas e 3,14% de branches, indicando a necessidade de testes adicionais de API e frontend.
 - Criados os lançadores clicáveis `iniciar-biblioteca.cmd` e `parar-biblioteca.cmd` para iniciar/parar a aplicação localmente; o lançador inicia o MySQL, API, frontend e abre o navegador.
 - `npm run lint` permanece pendente por bloqueio da política de execução do Windows sobre o binário nativo do `oxlint`.
