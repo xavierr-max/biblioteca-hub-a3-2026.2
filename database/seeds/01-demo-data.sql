@@ -1,3 +1,4 @@
+SET NAMES utf8mb4;
 USE biblioteca;
 INSERT INTO Categories (Name) VALUES ('Tecnologia'), ('Literatura') ON DUPLICATE KEY UPDATE Name=VALUES(Name);
 INSERT INTO Authors (Name) VALUES ('Robert C. Martin'), ('Machado de Assis') ON DUPLICATE KEY UPDATE Name=VALUES(Name);
