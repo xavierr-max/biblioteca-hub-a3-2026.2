@@ -31,7 +31,7 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
     protected override void OnModelCreating(ModelBuilder model)
     {
         model.Entity<Category>(e => { e.ToTable("Categories"); e.HasKey(x => x.CategoryId); e.Property(x => x.Name).HasMaxLength(100).IsRequired(); e.HasIndex(x => x.Name).IsUnique(); });
-        model.Entity<Book>(e => { e.ToTable("Books"); e.HasKey(x => x.BookId); e.Property(x => x.Title).HasMaxLength(200).IsRequired(); e.Property(x => x.Isbn13).HasColumnType("char(13)").IsRequired(); e.HasIndex(x => x.Isbn13).IsUnique(); e.HasOne<Category>().WithMany().HasForeignKey(x => x.CategoryId); });
+        model.Entity<Book>(e => { e.ToTable("Books"); e.HasKey(x => x.BookId); e.Property(x => x.Title).HasMaxLength(200).IsRequired(); e.Property(x => x.Isbn13).HasColumnType("char(13)").IsRequired(); e.HasIndex(x => x.Isbn13).IsUnique(); e.HasOne<Category>().WithMany().HasForeignKey(x => x.CategoryId); e.HasOne<Publisher>().WithMany().HasForeignKey(x => x.PublisherId); });
         model.Entity<Author>(e => { e.ToTable("Authors"); e.HasKey(x => x.AuthorId); e.Property(x => x.Name).HasMaxLength(150).IsRequired(); e.HasIndex(x => x.Name).IsUnique(); });
         model.Entity<BookAuthor>(e => { e.ToTable("BookAuthors"); e.HasKey(x => new { x.BookId, x.AuthorId }); e.HasOne<Book>().WithMany().HasForeignKey(x => x.BookId); e.HasOne<Author>().WithMany().HasForeignKey(x => x.AuthorId); });
         model.Entity<Copy>(e => { e.ToTable("Copies"); e.HasKey(x => x.CopyId); e.Property(x => x.InventoryCode).HasMaxLength(40).IsRequired(); e.Property(x => x.Status).HasConversion<string>().HasMaxLength(20); e.HasIndex(x => x.InventoryCode).IsUnique(); e.HasOne<Book>().WithMany().HasForeignKey(x => x.BookId); });
