@@ -1,0 +1,13 @@
+erDiagram
+  Categories ||--o{ Books : "CategoryId"
+  Publishers ||--o{ Books : "PublisherId"
+  Books ||--o{ Copies : "BookId"
+  Books ||--o{ BookAuthors : "BookId"
+  Authors ||--o{ BookAuthors : "AuthorId"
+  Books ||--o{ BookGenres : "BookId"
+  Genres ||--o{ BookGenres : "GenreId"
+  Copies ||--o{ Loans : "CopyId"
+  Readers ||--o{ Loans : "ReaderId"
+  Books ||--o{ Reservations : "BookId"
+  Readers ||--o{ Reservations : "ReaderId"
+  Loans ||--o| Fines : "LoanId UNIQUE"
